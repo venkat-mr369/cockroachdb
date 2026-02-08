@@ -255,8 +255,6 @@ Fix real production issues.
 
 ## 🧪 LAB 9: Cluster Maintenance (Day-2 Operations)
 
-![Image](https://images.ctfassets.net/00voh0j35590/2MeXO9Rd5SK0S59fF9k3jk/2bf309385e7cb9992408577f6e8af9f1/rolling-upgrades-how-to-upgrade-your-clusters-in-2-clicks.JPG)
-
 ![Image](https://user-images.githubusercontent.com/4730669/120014337-efe6e280-bfaf-11eb-94c6-a3273e3210e2.png)
 
 ![Image](https://www.cockroachlabs.com/docs/images/cockroachcloud/advanced-architecture.png)
@@ -283,7 +281,7 @@ Operate CRDB safely in production.
 
 ---
 
-## 🧪 LAB 10: Capstone Lab (Final Boss 😄)
+## 🧪 LAB 10: Capstone Lab 
 
 ### Scenario
 
@@ -305,17 +303,5 @@ Operate CRDB safely in production.
 
 ---
 
-## 🎓 What You’ll Have After These Labs
-
-* Hands-on **distributed SQL mastery**
-* Production-grade DBA confidence
-* Clear differentiation from MySQL/PostgreSQL
-* Ready for **CockroachDB certification & interviews**
-
----
-
-
-2️⃣ **Kubernetes-based CockroachDB labs**
-3️⃣ **CockroachDB vs PostgreSQL hands-on comparison**
 
 
