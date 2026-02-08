@@ -19,27 +19,27 @@ For trading applications like OpenAlgo, CockroachDB provides:
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                      Kubernetes Cluster                      │
-│                                                               │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
-│  │ CockroachDB│ │ CockroachDB│ │ CockroachDB│ │ CockroachDB│   │
-│  │  Node 0   │ │  Node 1   │ │  Node 2   │ │  Node 3   │   │
-│  │           │ │           │ │           │ │           │   │
-│  │ PV: 100GB │ │ PV: 100GB │ │ PV: 100GB │ │ PV: 100GB │   │
-│  └─────┬─────┘ └─────┬─────┘ └─────┬─────┘ └─────┬─────┘   │
+│                                                              │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐      │
+│  │ CockroachDB│ │ CockroachDB│ │ CockroachDB│ │ CockroachDB│ │
+│  │  Node 0   │ │  Node 1   │ │  Node 2   │ │  Node 3   │     │
+│  │           │ │           │ │           │ │           │     │
+│  │ PV: 100GB │ │ PV: 100GB │ │ PV: 100GB │ │ PV: 100GB │     │
+│  └─────┬─────┘ └─────┬─────┘ └─────┬─────┘ └─────┬─────┘     │
 │        │             │             │             │           │
 │        └─────────────┴─────────────┴─────────────┘           │
-│                  Internal Gossip Protocol                     │
-│                                                               │
+│                  Internal Gossip Protocol                    │
+│                                                              │
 │  ┌────────────────────────────────────────────────────────┐  │
-│  │            Headless Service (Cluster)                   │  │
+│  │            Headless Service (Cluster)                  │  │
 │  │      cockroachdb-0.cockroachdb:26257                   │  │
 │  │      cockroachdb-1.cockroachdb:26257                   │  │
 │  │      cockroachdb-2.cockroachdb:26257                   │  │
 │  │      cockroachdb-3.cockroachdb:26257                   │  │
 │  └────────────────────────────────────────────────────────┘  │
-│                                                               │
+│                                                              │
 │  ┌────────────────────────────────────────────────────────┐  │
-│  │         Public Service (Load Balanced)                  │  │
+│  │         Public Service (Load Balanced)                 │  │
 │  │        cockroachdb-public:26257 (SQL)                  │  │
 │  │        cockroachdb-public:8080 (Admin UI)              │  │
 │  └────────────────────────────────────────────────────────┘  │
