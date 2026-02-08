@@ -1,0 +1,81 @@
+---
+# Headless service for stable DNS entries of StatefulSet members
+apiVersion: v1
+kind: Service
+metadata:
+  name: cockroachdb
+  namespace: trading
+  labels:
+    app: cockroachdb
+  annotations:
+    # Use this annotation in addition to the actual field below because the
+    # annotation will stop being respected soon but the field is broken in
+    # some versions of Kubernetes:
+    # https://github.com/kubernetes/kubernetes/issues/58662
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+    # Enable automatic monitoring of all instances when Prometheus is running in the cluster
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "_status/vars"
+    prometheus.io/port: "8080"
+spec:
+  clusterIP: None
+  # This is needed for the Headless Service to work properly
+  publishNotReadyAddresses: true
+  ports:
+  - port: 26257
+    targetPort: 26257
+    name: grpc
+  - port: 8080
+    targetPort: 8080
+    name: http
+  selector:
+    app: cockroachdb
+
+---
+# Public service for clients to connect
+apiVersion: v1
+kind: Service
+metadata:
+  name: cockroachdb-public
+  namespace: trading
+  labels:
+    app: cockroachdb
+spec:
+  type: ClusterIP
+  ports:
+  - port: 26257
+    targetPort: 26257
+    name: grpc
+    protocol: TCP
+  - port: 8080
+    targetPort: 8080
+    name: http
+    protocol: TCP
+  selector:
+    app: cockroachdb
+
+---
+# LoadBalancer service for external access (optional - for testing/dev)
+# In production, use Ingress or NodePort instead
+apiVersion: v1
+kind: Service
+metadata:
+  name: cockroachdb-external
+  namespace: trading
+  labels:
+    app: cockroachdb
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 26257
+    targetPort: 26257
+    name: grpc
+    protocol: TCP
+  - port: 8080
+    targetPort: 8080
+    name: http
+    protocol: TCP
+  selector:
+    app: cockroachdb
+  # Uncomment to use specific load balancer IP
+  # loadBalancerIP: 1.2.3.4

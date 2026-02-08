@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cockroachdb
+  namespace: trading
+  labels:
+    app: cockroachdb
+spec:
+  serviceName: cockroachdb
+  replicas: 4
+  selector:
+    matchLabels:
+      app: cockroachdb
+  template:
+    metadata:
+      labels:
+        app: cockroachdb
+    spec:
+      # Anti-affinity to spread pods across nodes for fault tolerance
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - cockroachdb
+              topologyKey: kubernetes.io/hostname
+      
+      containers:
+      - name: cockroachdb
+        image: cockroachdb/cockroach:v23.2.0
+        imagePullPolicy: IfNotPresent
+        
+        # Resource limits for trading workload
+        resources:
+          requests:
+            cpu: "2"
+            memory: "4Gi"
+          limits:
+            cpu: "4"
+            memory: "8Gi"
+        
+        ports:
+        - containerPort: 26257
+          name: grpc
+        - containerPort: 8080
+          name: http
+        
+        # Liveness probe - restart if unhealthy
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          failureThreshold: 3
+        
+        # Readiness probe - remove from service if not ready
+        readinessProbe:
+          httpGet:
+            path: /health?ready=1
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 2
+        
+        volumeMounts:
+        - name: datadir
+          mountPath: /cockroach/cockroach-data
+        
+        env:
+        - name: COCKROACH_CHANNEL
+          value: kubernetes-insecure
+        
+        command:
+          - "/bin/bash"
+          - "-ecx"
+          - |
+            # The use of qualified `hostname -f` is crucial:
+            # Other nodes aren't able to look up the unqualified hostname.
+            exec /cockroach/cockroach start \
+            --logtostderr \
+            --insecure \
+            --advertise-host $(hostname -f) \
+            --http-addr 0.0.0.0 \
+            --join cockroachdb-0.cockroachdb.trading.svc.cluster.local:26257,cockroachdb-1.cockroachdb.trading.svc.cluster.local:26257,cockroachdb-2.cockroachdb.trading.svc.cluster.local:26257,cockroachdb-3.cockroachdb.trading.svc.cluster.local:26257 \
+            --cache 25% \
+            --max-sql-memory 25%
+      
+      # No pre-stop hook required, but you can add graceful shutdown here
+      terminationGracePeriodSeconds: 60
+  
+  # Persistent volume claim template
+  volumeClaimTemplates:
+  - metadata:
+      name: datadir
+      labels:
+        app: cockroachdb
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 100Gi
+      # Uncomment and specify storageClassName if using a specific storage class
+      # storageClassName: fast-ssd
+  
+  # Update strategy - RollingUpdate for zero-downtime upgrades
+  updateStrategy:
+    type: RollingUpdate
+  
+  podManagementPolicy: Parallel

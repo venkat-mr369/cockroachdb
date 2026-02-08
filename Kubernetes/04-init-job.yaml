@@ -1,0 +1,62 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cockroachdb-init
+  namespace: trading
+  labels:
+    app: cockroachdb-init
+spec:
+  template:
+    metadata:
+      labels:
+        app: cockroachdb-init
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: cluster-init
+        image: cockroachdb/cockroach:v23.2.0
+        imagePullPolicy: IfNotPresent
+        command:
+          - "/bin/bash"
+          - "-ecx"
+          - |
+            # Wait for pods to be ready
+            echo "Waiting for CockroachDB pods to be ready..."
+            for i in {0..3}; do
+              until nc -z cockroachdb-${i}.cockroachdb.trading.svc.cluster.local 26257; do
+                echo "Waiting for cockroachdb-${i}..."
+                sleep 2
+              done
+              echo "cockroachdb-${i} is ready"
+            done
+            
+            # Initialize the cluster
+            echo "Initializing cluster..."
+            /cockroach/cockroach init \
+            --insecure \
+            --host=cockroachdb-0.cockroachdb.trading.svc.cluster.local:26257
+            
+            echo "Cluster initialized successfully!"
+            
+            # Wait a bit for cluster to stabilize
+            sleep 5
+            
+            # Create openalgo database and user
+            echo "Creating openalgo database and user..."
+            /cockroach/cockroach sql \
+            --insecure \
+            --host=cockroachdb-0.cockroachdb.trading.svc.cluster.local:26257 \
+            --execute="
+              CREATE DATABASE IF NOT EXISTS openalgo;
+              CREATE USER IF NOT EXISTS openalgo WITH PASSWORD 'trading123';
+              GRANT ALL ON DATABASE openalgo TO openalgo;
+            "
+            
+            echo "Database setup complete!"
+            
+            # Show cluster status
+            echo "Cluster status:"
+            /cockroach/cockroach node status \
+            --insecure \
+            --host=cockroachdb-0.cockroachdb.trading.svc.cluster.local:26257
+  backoffLimit: 3
