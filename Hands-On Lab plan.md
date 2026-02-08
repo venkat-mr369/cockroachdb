@@ -176,11 +176,7 @@ Implement enterprise-grade security.
 
 ## 🧪 LAB 6: Backup & Restore (Most Important for DBAs)
 
-![Image](https://images.ctfassets.net/00voh0j35590/5IBC0JVV8BFAYwAdLPCoeM/dc1e1631069a07a664c5cd7e1efd3fe6/how-backup-restore-works-under-the-hood.JPG)
-
 ![Image](https://images.ctfassets.net/00voh0j35590/40YlKM5SYGs9JXQ1YtTM2r/f5744f0b080440cfe5c7e5ff07d52aa0/Disaster_Recovery_with_CockroachDB.png)
-
-![Image](https://images.ctfassets.net/00voh0j35590/56vLKGjgnyP0wZQrDLKUJx/7ef7f992258da2d960ab189778c04890/disaster-recovery-mastering-pcr.png)
 
 ### Objective
 
