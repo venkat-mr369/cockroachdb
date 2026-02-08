@@ -8,3 +8,4 @@ Here's your comprehensive architecture document covering the full CockroachDB da
 - **Zone configurations** for different trading tables
 - **CentOS 9 OS tuning**, cluster settings, and HAProxy load balancing config
 - **Monitoring metrics** critical for trading workloads
+
