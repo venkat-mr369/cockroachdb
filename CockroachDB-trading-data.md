@@ -9,7 +9,7 @@ Here's your comprehensive architecture document covering the full CockroachDB da
 - **CentOS 9 OS tuning**, cluster settings, and HAProxy load balancing config
 - **Monitoring metrics** critical for trading workloads
 
-(cockroachdb_trading_architecture) ([cockroachdb_trading_architecture.docx](https://github.com/venkat-mr369/cockroachdb/blob/main/cockroachdb_trading_architecture.docx))
+([cockroachdb_trading_architecture.docx](https://github.com/venkat-mr369/cockroachdb/blob/main/cockroachdb_trading_architecture.docx))
 
 
 
