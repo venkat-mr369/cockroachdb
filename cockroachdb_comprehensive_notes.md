@@ -1,5 +1,5 @@
-# COCKROACHDB COMPREHENSIVE NOTES
-## Complete Chapter-wise In-depth Study Guide
+### COCKROACHDB COMPREHENSIVE
+#### Complete Chapter-wise In-depth Study Guide
 
 ---
 
