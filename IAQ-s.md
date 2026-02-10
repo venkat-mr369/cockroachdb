@@ -39,10 +39,16 @@ CockroachDB DBA interview questions document with solutions
 
 ## **Key Features:**
 ✅ 25 comprehensive questions with detailed solutions
+
 ✅ SQL code examples for every concept
+
 ✅ Command-line examples for administration tasks
+
 ✅ Best practices and anti-patterns
+
 ✅ Monitoring and troubleshooting techniques
+
 ✅ Production-ready configurations
+
 ✅ Table of contents for easy navigation
 
