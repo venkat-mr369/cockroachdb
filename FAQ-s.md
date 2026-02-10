@@ -52,5 +52,5 @@ CockroachDB DBA interview questions document with solutions
 
 ✅ Table of contents for easy navigation
 
-[Interview Basic to Advanced Questions](https://github.com/venkat-mr369/cockroachdb/blob/main/CDB_DBA_Interview_Questions-feb-26.docx)
+[Interview Questions Basic to Advanced](https://github.com/venkat-mr369/cockroachdb/blob/main/CDB_DBA_Interview_Questions-feb-26.docx)
 
