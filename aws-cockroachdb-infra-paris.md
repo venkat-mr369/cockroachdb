@@ -24,7 +24,7 @@ aws ec2 create-vpc \
   --cidr-block 10.0.0.0/16 \
   --tag-specifications 'ResourceType=vpc,Tags=[{Key=Name,Value=cockroachdb-vpc}]' \
   --region eu-west-3
-
+```
 # Note the VpcId from output — e.g., vpc-0abc123def456789
 # Export it for reuse
 export VPC_ID="vpc-0abc123def456789"
