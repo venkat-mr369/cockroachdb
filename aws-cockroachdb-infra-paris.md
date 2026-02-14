@@ -5,7 +5,7 @@
 ## Step 1: Create VPC
 
 ```bash
-aws ec2 create-vpc --cidr-block 10.0.0.0/16 --region eu-west-3
+aws ec2 create-vpc paris-vpc --cidr-block 10.0.0.0/16 --region eu-west-3
 ```
 Note the VpcId from output:
 ```bash
