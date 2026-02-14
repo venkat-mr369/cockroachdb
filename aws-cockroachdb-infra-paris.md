@@ -1,5 +1,5 @@
-# AWS Infrastructure Setup — Paris Region (eu-west-3)
-## CockroachDB 3-Node Cluster on Private Subnets
+## AWS Infrastructure Setup — Paris Region (eu-west-3)
+### CockroachDB 3-Node Cluster on Private Subnets
 
 ---
 
