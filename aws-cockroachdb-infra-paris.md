@@ -25,15 +25,18 @@ aws ec2 create-vpc \
   --tag-specifications 'ResourceType=vpc,Tags=[{Key=Name,Value=cockroachdb-vpc}]' \
   --region eu-west-3
 ```
+```bash
 # Note the VpcId from output — e.g., vpc-0abc123def456789
 # Export it for reuse
 export VPC_ID="vpc-0abc123def456789"
-
+```
+```bash
 # Enable DNS hostnames (required for internal resolution)
 aws ec2 modify-vpc-attribute \
   --vpc-id $VPC_ID \
   --enable-dns-hostnames '{"Value": true}'
-
+```
+```bash
 # Enable DNS support
 aws ec2 modify-vpc-attribute \
   --vpc-id $VPC_ID \
