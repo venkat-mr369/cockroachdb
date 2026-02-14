@@ -1,256 +1,145 @@
-## AWS Infrastructure Setup — Paris Region (eu-west-3)
-### CockroachDB 3-Node Cluster on Private Subnets
+# AWS Infrastructure Setup — Paris (eu-west-3)
 
 ---
 
-## Prerequisites
+## Step 1: Create VPC
 
 ```bash
-# Configure AWS CLI with Paris region
-aws configure
-# AWS Access Key ID: <your-key>
-# AWS Secret Access Key: <your-secret>
-# Default region name: eu-west-3
-# Default output format: json
+aws ec2 create-vpc --cidr-block 10.0.0.0/16 --region eu-west-3
+```
+Note the VpcId from output:
+```bash
+export VPC_ID="vpc-xxxxx"
 ```
 
----
+Tag it:
+```bash
+aws ec2 create-tags --resources $VPC_ID --tags Key=Name,Value=paris-vpc
+```
 
-## Step 1: VPC Creation
-
+Enable DNS:
 ```bash
-# Create VPC with CIDR 10.0.0.0/16
-aws ec2 create-vpc \
-  --cidr-block 10.0.0.0/16 \
-  --tag-specifications 'ResourceType=vpc,Tags=[{Key=Name,Value=cockroachdb-vpc}]' \
-  --region eu-west-3
-```
-```bash
-# Note the VpcId from output — e.g., vpc-0abc123def456789
-# Export it for reuse
-export VPC_ID="vpc-0abc123def456789"
-```
-```bash
-# Enable DNS hostnames (required for internal resolution)
-aws ec2 modify-vpc-attribute \
-  --vpc-id $VPC_ID \
-  --enable-dns-hostnames '{"Value": true}'
-```
-```bash
-# Enable DNS support
-aws ec2 modify-vpc-attribute \
-  --vpc-id $VPC_ID \
-  --enable-dns-support '{"Value": true}'
+aws ec2 modify-vpc-attribute --vpc-id $VPC_ID --enable-dns-hostnames
+aws ec2 modify-vpc-attribute --vpc-id $VPC_ID --enable-dns-support
 ```
 
 ---
 
-## Step 2: Create 3 Private Subnets + 1 Public Subnet
+## Step 2: Create Subnets (3 Private + 1 Public)
 
-Paris has 3 AZs: `eu-west-3a`, `eu-west-3b`, `eu-west-3c`
-
-### Private Subnets (for CockroachDB nodes)
-
+### Private Subnet 1 (for db1)
 ```bash
-# Private Subnet 1 — eu-west-3a (for db1)
-aws ec2 create-subnet \
-  --vpc-id $VPC_ID \
-  --cidr-block 10.0.1.0/24 \
-  --availability-zone eu-west-3a \
-  --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=cockroach-private-1a}]'
-
-export PRIVATE_SUBNET_1="subnet-xxxxxxxxxxxxxxxxx"
-
-# Private Subnet 2 — eu-west-3b (for db2)
-aws ec2 create-subnet \
-  --vpc-id $VPC_ID \
-  --cidr-block 10.0.2.0/24 \
-  --availability-zone eu-west-3b \
-  --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=cockroach-private-2b}]'
-
-export PRIVATE_SUBNET_2="subnet-xxxxxxxxxxxxxxxxx"
-
-# Private Subnet 3 — eu-west-3c (for db3)
-aws ec2 create-subnet \
-  --vpc-id $VPC_ID \
-  --cidr-block 10.0.3.0/24 \
-  --availability-zone eu-west-3c \
-  --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=cockroach-private-3c}]'
-
-export PRIVATE_SUBNET_3="subnet-xxxxxxxxxxxxxxxxx"
+aws ec2 create-subnet --vpc-id $VPC_ID --cidr-block 10.0.1.0/24 --availability-zone eu-west-3a
+export PRIV_SUB_1="subnet-xxxxx"
+aws ec2 create-tags --resources $PRIV_SUB_1 --tags Key=Name,Value=paris-private-1
 ```
 
-### Public Subnet (for NAT Gateway + Bastion/Jump host)
-
+### Private Subnet 2 (for db2)
 ```bash
-# Public Subnet — eu-west-3a
-aws ec2 create-subnet \
-  --vpc-id $VPC_ID \
-  --cidr-block 10.0.100.0/24 \
-  --availability-zone eu-west-3a \
-  --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=cockroach-public-1a}]'
+aws ec2 create-subnet --vpc-id $VPC_ID --cidr-block 10.0.2.0/24 --availability-zone eu-west-3b
+export PRIV_SUB_2="subnet-xxxxx"
+aws ec2 create-tags --resources $PRIV_SUB_2 --tags Key=Name,Value=paris-private-2
+```
 
-export PUBLIC_SUBNET="subnet-xxxxxxxxxxxxxxxxx"
+### Private Subnet 3 (for db3)
+```bash
+aws ec2 create-subnet --vpc-id $VPC_ID --cidr-block 10.0.3.0/24 --availability-zone eu-west-3c
+export PRIV_SUB_3="subnet-xxxxx"
+aws ec2 create-tags --resources $PRIV_SUB_3 --tags Key=Name,Value=paris-private-3
+```
 
-# Enable auto-assign public IP on public subnet
-aws ec2 modify-subnet-attribute \
-  --subnet-id $PUBLIC_SUBNET \
-  --map-public-ip-on-launch
+### Public Subnet (for NAT + Bastion)
+```bash
+aws ec2 create-subnet --vpc-id $VPC_ID --cidr-block 10.0.100.0/24 --availability-zone eu-west-3a
+export PUB_SUB="subnet-xxxxx"
+aws ec2 create-tags --resources $PUB_SUB --tags Key=Name,Value=paris-public
+
+aws ec2 modify-subnet-attribute --subnet-id $PUB_SUB --map-public-ip-on-launch
 ```
 
 ---
 
-## Step 3: Create and Attach Internet Gateway
+## Step 3: Create & Attach Internet Gateway
 
 ```bash
-# Create Internet Gateway
-aws ec2 create-internet-gateway \
-  --tag-specifications 'ResourceType=internet-gateway,Tags=[{Key=Name,Value=cockroach-igw}]'
+aws ec2 create-internet-gateway
+export IGW="igw-xxxxx"
+aws ec2 create-tags --resources $IGW --tags Key=Name,Value=paris-igw
 
-export IGW_ID="igw-xxxxxxxxxxxxxxxxx"
-
-# Attach IGW to VPC
-aws ec2 attach-internet-gateway \
-  --internet-gateway-id $IGW_ID \
-  --vpc-id $VPC_ID
+aws ec2 attach-internet-gateway --internet-gateway-id $IGW --vpc-id $VPC_ID
 ```
 
 ---
 
-## Step 4: Create Route Tables and Update Routes
+## Step 4: Create Route Tables & Add Routes
 
-### Public Route Table (for public subnet)
-
+### Public Route Table
 ```bash
-# Create public route table
-aws ec2 create-route-table \
-  --vpc-id $VPC_ID \
-  --tag-specifications 'ResourceType=route-table,Tags=[{Key=Name,Value=cockroach-public-rt}]'
+aws ec2 create-route-table --vpc-id $VPC_ID
+export PUB_RT="rtb-xxxxx"
+aws ec2 create-tags --resources $PUB_RT --tags Key=Name,Value=paris-public-rt
 
-export PUBLIC_RT="rtb-xxxxxxxxxxxxxxxxx"
+aws ec2 create-route --route-table-id $PUB_RT --destination-cidr-block 0.0.0.0/0 --gateway-id $IGW
 
-# Add route to Internet Gateway (0.0.0.0/0 → IGW)
-aws ec2 create-route \
-  --route-table-id $PUBLIC_RT \
-  --destination-cidr-block 0.0.0.0/0 \
-  --gateway-id $IGW_ID
-
-# Associate public subnet with public route table
-aws ec2 associate-route-table \
-  --route-table-id $PUBLIC_RT \
-  --subnet-id $PUBLIC_SUBNET
+aws ec2 associate-route-table --route-table-id $PUB_RT --subnet-id $PUB_SUB
 ```
 
-### Private Route Table (for private subnets)
-
+### Private Route Table
 ```bash
-# Create private route table
-aws ec2 create-route-table \
-  --vpc-id $VPC_ID \
-  --tag-specifications 'ResourceType=route-table,Tags=[{Key=Name,Value=cockroach-private-rt}]'
+aws ec2 create-route-table --vpc-id $VPC_ID
+export PRIV_RT="rtb-xxxxx"
+aws ec2 create-tags --resources $PRIV_RT --tags Key=Name,Value=paris-private-rt
 
-export PRIVATE_RT="rtb-xxxxxxxxxxxxxxxxx"
-
-# Associate all 3 private subnets with private route table
-aws ec2 associate-route-table \
-  --route-table-id $PRIVATE_RT \
-  --subnet-id $PRIVATE_SUBNET_1
-
-aws ec2 associate-route-table \
-  --route-table-id $PRIVATE_RT \
-  --subnet-id $PRIVATE_SUBNET_2
-
-aws ec2 associate-route-table \
-  --route-table-id $PRIVATE_RT \
-  --subnet-id $PRIVATE_SUBNET_3
+aws ec2 associate-route-table --route-table-id $PRIV_RT --subnet-id $PRIV_SUB_1
+aws ec2 associate-route-table --route-table-id $PRIV_RT --subnet-id $PRIV_SUB_2
+aws ec2 associate-route-table --route-table-id $PRIV_RT --subnet-id $PRIV_SUB_3
 ```
 
 ---
 
-## Step 5: Create NAT Gateway with Elastic IP
+## Step 5: Create NAT Gateway + Elastic IP
 
 ```bash
-# Allocate Elastic IP for NAT Gateway
-aws ec2 allocate-address \
-  --domain vpc \
-  --tag-specifications 'ResourceType=elastic-ip,Tags=[{Key=Name,Value=cockroach-nat-eip}]'
+# Allocate Elastic IP
+aws ec2 allocate-address --domain vpc
+export EIP="eipalloc-xxxxx"
+aws ec2 create-tags --resources $EIP --tags Key=Name,Value=paris-nat-eip
 
-export EIP_ALLOC="eipalloc-xxxxxxxxxxxxxxxxx"
+# Create NAT Gateway in public subnet
+aws ec2 create-nat-gateway --subnet-id $PUB_SUB --allocation-id $EIP
+export NAT="nat-xxxxx"
+aws ec2 create-tags --resources $NAT --tags Key=Name,Value=paris-nat
 
-# Create NAT Gateway in PUBLIC subnet
-aws ec2 create-nat-gateway \
-  --subnet-id $PUBLIC_SUBNET \
-  --allocation-id $EIP_ALLOC \
-  --tag-specifications 'ResourceType=natgateway,Tags=[{Key=Name,Value=cockroach-nat-gw}]'
+# Wait until NAT is ready (1-2 min)
+aws ec2 wait nat-gateway-available --nat-gateway-ids $NAT
 
-export NAT_GW="nat-xxxxxxxxxxxxxxxxx"
-
-# Wait for NAT Gateway to become available (takes 1-2 minutes)
-aws ec2 wait nat-gateway-available --nat-gateway-ids $NAT_GW
-echo "NAT Gateway is ready!"
-
-# Add route in PRIVATE route table: 0.0.0.0/0 → NAT Gateway
-aws ec2 create-route \
-  --route-table-id $PRIVATE_RT \
-  --destination-cidr-block 0.0.0.0/0 \
-  --nat-gateway-id $NAT_GW
+# Add route: private subnets → NAT Gateway
+aws ec2 create-route --route-table-id $PRIV_RT --destination-cidr-block 0.0.0.0/0 --nat-gateway-id $NAT
 ```
 
 ---
 
 ## Step 6: Create Security Groups
 
-### CockroachDB Security Group (private instances)
-
+### CockroachDB SG (for private nodes)
 ```bash
-# Create security group for CockroachDB nodes
-aws ec2 create-security-group \
-  --group-name cockroach-sg \
-  --description "CockroachDB cluster security group" \
-  --vpc-id $VPC_ID \
-  --tag-specifications 'ResourceType=security-group,Tags=[{Key=Name,Value=cockroach-sg}]'
+aws ec2 create-security-group --group-name paris-crdb-sg --description "CockroachDB nodes" --vpc-id $VPC_ID
+export CRDB_SG="sg-xxxxx"
+aws ec2 create-tags --resources $CRDB_SG --tags Key=Name,Value=paris-crdb-sg
 
-export CRDB_SG="sg-xxxxxxxxxxxxxxxxx"
-
-# Allow inter-node communication (port 26257) within VPC
-aws ec2 authorize-security-group-ingress \
-  --group-id $CRDB_SG \
-  --protocol tcp \
-  --port 26257 \
-  --cidr 10.0.0.0/16
-
-# Allow Admin UI (port 8080) within VPC
-aws ec2 authorize-security-group-ingress \
-  --group-id $CRDB_SG \
-  --protocol tcp \
-  --port 8080 \
-  --cidr 10.0.0.0/16
-
-# Allow SSH from within VPC (for bastion access)
-aws ec2 authorize-security-group-ingress \
-  --group-id $CRDB_SG \
-  --protocol tcp \
-  --port 22 \
-  --cidr 10.0.0.0/16
+aws ec2 authorize-security-group-ingress --group-id $CRDB_SG --protocol tcp --port 26257 --cidr 10.0.0.0/16
+aws ec2 authorize-security-group-ingress --group-id $CRDB_SG --protocol tcp --port 8080 --cidr 10.0.0.0/16
+aws ec2 authorize-security-group-ingress --group-id $CRDB_SG --protocol tcp --port 22 --cidr 10.0.0.0/16
 ```
 
-### Bastion Security Group (public instance for SSH jump)
-
+### Bastion SG (for jump host)
 ```bash
-aws ec2 create-security-group \
-  --group-name bastion-sg \
-  --description "Bastion host security group" \
-  --vpc-id $VPC_ID \
-  --tag-specifications 'ResourceType=security-group,Tags=[{Key=Name,Value=bastion-sg}]'
+aws ec2 create-security-group --group-name paris-bastion-sg --description "Bastion SSH" --vpc-id $VPC_ID
+export BASTION_SG="sg-xxxxx"
+aws ec2 create-tags --resources $BASTION_SG --tags Key=Name,Value=paris-bastion-sg
 
-export BASTION_SG="sg-xxxxxxxxxxxxxxxxx"
-
-# Allow SSH from your IP (replace with your public IP)
-aws ec2 authorize-security-group-ingress \
-  --group-id $BASTION_SG \
-  --protocol tcp \
-  --port 22 \
-  --cidr <YOUR_PUBLIC_IP>/32
+# Replace YOUR_IP with your public IP
+aws ec2 authorize-security-group-ingress --group-id $BASTION_SG --protocol tcp --port 22 --cidr YOUR_IP/32
 ```
 
 ---
@@ -258,238 +147,170 @@ aws ec2 authorize-security-group-ingress \
 ## Step 7: Create Key Pair
 
 ```bash
-aws ec2 create-key-pair \
-  --key-name cockroach-key \
-  --key-type rsa \
-  --query 'KeyMaterial' \
-  --output text > cockroach-key.pem
-
-chmod 400 cockroach-key.pem
+aws ec2 create-key-pair --key-name paris-key --query 'KeyMaterial' --output text > paris-key.pem
+chmod 400 paris-key.pem
 ```
 
 ---
 
-## Step 8: Launch EC2 Instances
+## Step 8: Get AMI & Launch EC2 Instances
 
-### Find latest Ubuntu 24.04 AMI in Paris
-
+### Get Ubuntu 24.04 AMI
 ```bash
-export AMI_ID=$(aws ec2 describe-images \
+export AMI=$(aws ec2 describe-images \
   --owners 099720109477 \
   --filters "Name=name,Values=ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*" \
             "Name=state,Values=available" \
   --query 'Images | sort_by(@, &CreationDate) | [-1].ImageId' \
-  --output text \
-  --region eu-west-3)
-
-echo "AMI: $AMI_ID"
-```
-
-### Launch 3 CockroachDB Nodes (Private Subnets)
-
-```bash
-# db1 — Private Subnet 1 (eu-west-3a) — IP: 10.0.1.10
-aws ec2 run-instances \
-  --image-id $AMI_ID \
-  --instance-type t3.medium \
-  --key-name cockroach-key \
-  --subnet-id $PRIVATE_SUBNET_1 \
-  --private-ip-address 10.0.1.10 \
-  --security-group-ids $CRDB_SG \
-  --block-device-mappings '[{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":50,"VolumeType":"gp3"}}]' \
-  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=cockroach-db1}]' \
-  --region eu-west-3
-
-export DB1_INSTANCE="i-xxxxxxxxxxxxxxxxx"
-
-# db2 — Private Subnet 2 (eu-west-3b) — IP: 10.0.2.10
-aws ec2 run-instances \
-  --image-id $AMI_ID \
-  --instance-type t3.medium \
-  --key-name cockroach-key \
-  --subnet-id $PRIVATE_SUBNET_2 \
-  --private-ip-address 10.0.2.10 \
-  --security-group-ids $CRDB_SG \
-  --block-device-mappings '[{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":50,"VolumeType":"gp3"}}]' \
-  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=cockroach-db2}]' \
-  --region eu-west-3
-
-export DB2_INSTANCE="i-xxxxxxxxxxxxxxxxx"
-
-# db3 — Private Subnet 3 (eu-west-3c) — IP: 10.0.3.10
-aws ec2 run-instances \
-  --image-id $AMI_ID \
-  --instance-type t3.medium \
-  --key-name cockroach-key \
-  --subnet-id $PRIVATE_SUBNET_3 \
-  --private-ip-address 10.0.3.10 \
-  --security-group-ids $CRDB_SG \
-  --block-device-mappings '[{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":50,"VolumeType":"gp3"}}]' \
-  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=cockroach-db3}]' \
-  --region eu-west-3
-
-export DB3_INSTANCE="i-xxxxxxxxxxxxxxxxx"
-```
-
-### Launch Bastion Host (Public Subnet)
-
-```bash
-aws ec2 run-instances \
-  --image-id $AMI_ID \
-  --instance-type t3.micro \
-  --key-name cockroach-key \
-  --subnet-id $PUBLIC_SUBNET \
-  --security-group-ids $BASTION_SG \
-  --associate-public-ip-address \
-  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=cockroach-bastion}]' \
-  --region eu-west-3
-
-export BASTION_INSTANCE="i-xxxxxxxxxxxxxxxxx"
-```
-
----
-
-## Step 9: Wait for Instances and Get IPs
-
-```bash
-# Wait for all instances to be running
-aws ec2 wait instance-running \
-  --instance-ids $DB1_INSTANCE $DB2_INSTANCE $DB3_INSTANCE $BASTION_INSTANCE
-
-# Get Bastion public IP
-export BASTION_IP=$(aws ec2 describe-instances \
-  --instance-ids $BASTION_INSTANCE \
-  --query 'Reservations[0].Instances[0].PublicIpAddress' \
   --output text)
+echo $AMI
+```
 
-echo "Bastion Public IP: $BASTION_IP"
+### Launch db1 (10.0.1.10)
+```bash
+aws ec2 run-instances \
+  --image-id $AMI \
+  --instance-type t3.medium \
+  --key-name paris-key \
+  --subnet-id $PRIV_SUB_1 \
+  --private-ip-address 10.0.1.10 \
+  --security-group-ids $CRDB_SG
+export DB1="i-xxxxx"
+aws ec2 create-tags --resources $DB1 --tags Key=Name,Value=paris-db1
+```
 
-# Verify private IPs
-aws ec2 describe-instances \
-  --instance-ids $DB1_INSTANCE $DB2_INSTANCE $DB3_INSTANCE \
-  --query 'Reservations[].Instances[].[Tags[?Key==`Name`].Value|[0],PrivateIpAddress]' \
-  --output table
+### Launch db2 (10.0.2.10)
+```bash
+aws ec2 run-instances \
+  --image-id $AMI \
+  --instance-type t3.medium \
+  --key-name paris-key \
+  --subnet-id $PRIV_SUB_2 \
+  --private-ip-address 10.0.2.10 \
+  --security-group-ids $CRDB_SG
+export DB2="i-xxxxx"
+aws ec2 create-tags --resources $DB2 --tags Key=Name,Value=paris-db2
+```
+
+### Launch db3 (10.0.3.10)
+```bash
+aws ec2 run-instances \
+  --image-id $AMI \
+  --instance-type t3.medium \
+  --key-name paris-key \
+  --subnet-id $PRIV_SUB_3 \
+  --private-ip-address 10.0.3.10 \
+  --security-group-ids $CRDB_SG
+export DB3="i-xxxxx"
+aws ec2 create-tags --resources $DB3 --tags Key=Name,Value=paris-db3
+```
+
+### Launch Bastion (public)
+```bash
+aws ec2 run-instances \
+  --image-id $AMI \
+  --instance-type t3.micro \
+  --key-name paris-key \
+  --subnet-id $PUB_SUB \
+  --security-group-ids $BASTION_SG \
+  --associate-public-ip-address
+export BASTION="i-xxxxx"
+aws ec2 create-tags --resources $BASTION --tags Key=Name,Value=paris-bastion
 ```
 
 ---
 
-## Step 10: Test — SSH into Private Instance and curl google.com
-
-### SSH into Bastion, then hop to a private node
+## Step 9: Get Bastion Public IP
 
 ```bash
-# Option A: SSH Agent Forwarding (recommended)
+aws ec2 wait instance-running --instance-ids $DB1 $DB2 $DB3 $BASTION
+
+aws ec2 describe-instances --instance-ids $BASTION \
+  --query 'Reservations[0].Instances[0].PublicIpAddress' --output text
+```
+
+---
+
+## Step 10: Test — SSH & curl google.com
+
+```bash
+# Start SSH agent and add key
 eval "$(ssh-agent -s)"
-ssh-add cockroach-key.pem
+ssh-add paris-key.pem
 
-# SSH into bastion with agent forwarding
-ssh -A -i cockroach-key.pem ubuntu@$BASTION_IP
+# SSH to bastion (replace BASTION_IP)
+ssh -A -i paris-key.pem ubuntu@BASTION_IP
 
-# From bastion, SSH into db1 (private subnet)
+# From bastion, hop to db1
 ssh ubuntu@10.0.1.10
-```
 
-### Test internet access via NAT Gateway
-
-```bash
-# On the private EC2 instance (db1):
-
-# Quick test — should return "200"
-curl -s -o /dev/null -w "%{http_code}" https://www.google.com
-
-# Full test — should return Google HTML
+# Test internet via NAT Gateway
 curl https://www.google.com
-
-# Ping test
-ping -c 3 google.com
-
-# Headers only
 curl -I https://www.google.com
+ping -c 3 google.com
 ```
 
-If you get `200` or see Google HTML, your NAT Gateway is working correctly.
+If you see Google HTML or get `200` — NAT Gateway is working.
 
 ---
 
-## Architecture Diagram
+## Architecture
 
 ```
-                    INTERNET
-                       │
-                  ┌────┴────┐
-                  │   IGW   │
-                  └────┬────┘
-                       │
-              ┌────────┴─────────┐
-              │  cockroachdb-vpc  │
-              │   10.0.0.0/16    │
-              └────────┬─────────┘
-                       │
-         ┌─────────────┼──────────────┐
-         │             │              │
-   ┌─────┴──────┐     │     ┌────────┴────────┐
-   │  Public     │     │     │ Private Route   │
-   │  Subnet     │     │     │ Table           │
-   │ 10.0.100.0  │     │     │ 0.0.0.0/0 →    │
-   │   /24       │     │     │    NAT GW       │
-   │             │     │     └────────┬────────┘
-   │ • Bastion   │     │              │
-   │ • NAT GW    │     │     ┌────────┼────────┐
-   │   (+ EIP)   │     │     │        │        │
-   └─────────────┘     │     │        │        │
-                       │     │        │        │
-                 ┌─────┴──┐ ┌┴────────┴┐ ┌────┴─────┐
-                 │Private │ │Private   │ │Private   │
-                 │Sub 1   │ │Sub 2     │ │Sub 3     │
-                 │10.0.1.0│ │10.0.2.0  │ │10.0.3.0  │
-                 │  /24   │ │  /24     │ │  /24     │
-                 │        │ │          │ │          │
-                 │ db1    │ │ db2      │ │ db3      │
-                 │.1.10   │ │.2.10     │ │.3.10     │
-                 └────────┘ └──────────┘ └──────────┘
-                   3a          3b           3c
+              INTERNET
+                 │
+            ┌────┴────┐
+            │paris-igw│
+            └────┬────┘
+                 │
+          ┌──────┴───────┐
+          │  paris-vpc    │
+          │ 10.0.0.0/16  │
+          └──────┬───────┘
+                 │
+    ┌────────────┼────────────┐
+    │            │            │
+┌───┴────┐  ┌───┴────┐  ┌───┴────┐    ┌───────────┐
+│priv-1  │  │priv-2  │  │priv-3  │    │ public    │
+│10.0.1.0│  │10.0.2.0│  │10.0.3.0│    │10.0.100.0 │
+│  /24   │  │  /24   │  │  /24   │    │   /24     │
+│        │  │        │  │        │    │           │
+│ db1    │  │ db2    │  │ db3    │    │ bastion   │
+│ .1.10  │  │ .2.10  │  │ .3.10  │    │ nat-gw    │
+└────────┘  └────────┘  └────────┘    │ (+ EIP)   │
+   3a          3b          3c         └───────────┘
+                                          3a
+Private RT: 0.0.0.0/0 → NAT
+Public RT:  0.0.0.0/0 → IGW
 ```
 
 ---
 
-## Cleanup (when done)
+## Cleanup
 
 ```bash
-# Terminate instances
-aws ec2 terminate-instances \
-  --instance-ids $DB1_INSTANCE $DB2_INSTANCE $DB3_INSTANCE $BASTION_INSTANCE
-aws ec2 wait instance-terminated \
-  --instance-ids $DB1_INSTANCE $DB2_INSTANCE $DB3_INSTANCE $BASTION_INSTANCE
+aws ec2 terminate-instances --instance-ids $DB1 $DB2 $DB3 $BASTION
+aws ec2 wait instance-terminated --instance-ids $DB1 $DB2 $DB3 $BASTION
 
-# Delete NAT Gateway (wait ~60s for deletion)
-aws ec2 delete-nat-gateway --nat-gateway-id $NAT_GW
+aws ec2 delete-nat-gateway --nat-gateway-id $NAT
 sleep 60
+aws ec2 release-address --allocation-id $EIP
 
-# Release Elastic IP
-aws ec2 release-address --allocation-id $EIP_ALLOC
+aws ec2 detach-internet-gateway --internet-gateway-id $IGW --vpc-id $VPC_ID
+aws ec2 delete-internet-gateway --internet-gateway-id $IGW
 
-# Detach and delete IGW
-aws ec2 detach-internet-gateway --internet-gateway-id $IGW_ID --vpc-id $VPC_ID
-aws ec2 delete-internet-gateway --internet-gateway-id $IGW_ID
+aws ec2 delete-subnet --subnet-id $PRIV_SUB_1
+aws ec2 delete-subnet --subnet-id $PRIV_SUB_2
+aws ec2 delete-subnet --subnet-id $PRIV_SUB_3
+aws ec2 delete-subnet --subnet-id $PUB_SUB
 
-# Delete subnets
-aws ec2 delete-subnet --subnet-id $PRIVATE_SUBNET_1
-aws ec2 delete-subnet --subnet-id $PRIVATE_SUBNET_2
-aws ec2 delete-subnet --subnet-id $PRIVATE_SUBNET_3
-aws ec2 delete-subnet --subnet-id $PUBLIC_SUBNET
+aws ec2 delete-route-table --route-table-id $PUB_RT
+aws ec2 delete-route-table --route-table-id $PRIV_RT
 
-# Delete route tables (disassociate first if needed)
-aws ec2 delete-route-table --route-table-id $PUBLIC_RT
-aws ec2 delete-route-table --route-table-id $PRIVATE_RT
-
-# Delete security groups
 aws ec2 delete-security-group --group-id $CRDB_SG
 aws ec2 delete-security-group --group-id $BASTION_SG
 
-# Delete VPC
 aws ec2 delete-vpc --vpc-id $VPC_ID
-
-# Delete key pair
-aws ec2 delete-key-pair --key-name cockroach-key
-rm cockroach-key.pem
+aws ec2 delete-key-pair --key-name paris-key
+rm paris-key.pem
 ```
