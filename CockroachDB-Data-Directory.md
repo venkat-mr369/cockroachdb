@@ -1,5 +1,3 @@
----
-
 ### CockroachDB Data Directory (`/var/lib/cockroach/data`)
 
 ### Storage Engine Files (Pebble — like RocksDB/LSM Tree)
