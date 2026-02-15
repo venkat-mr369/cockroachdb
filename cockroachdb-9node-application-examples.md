@@ -1,4 +1,4 @@
-# 9-Node Multi-Region CockroachDB Cluster — Real-World Application Examples
+### 9-Node Multi-Region CockroachDB Cluster — Real-World Application Examples
 
 > 10 detailed real-world applications where a multi-region 9-node CockroachDB cluster (Paris, US-East, Mumbai) is the perfect fit — with architecture diagrams, database schemas, SQL examples, and why each app needs this setup.
 
@@ -12,14 +12,14 @@ Before diving into examples, understand the **3 core reasons** why applications 
   ┌─────────────────────────────────────────────────────────────────┐
   │               WHY MULTI-REGION?                                 │
   │                                                                 │
-  │  1. 🌍 LOW LATENCY        Users in Paris, USA & India all      │
+  │  1. 🌍 LOW LATENCY        Users in Paris, USA & India all       │
   │                            get fast responses (<50ms)           │
   │                                                                 │
-  │  2. 🛡️ SURVIVE FAILURES   If entire Paris region goes down,    │
+  │  2. 🛡️ SURVIVE FAILURES   If entire Paris region goes down,     │
   │                            US-East & Mumbai keep working        │
   │                            (99.999% uptime = 5 min downtime/yr) │
   │                                                                 │
-  │  3. 📜 DATA COMPLIANCE    GDPR says EU user data stays in EU   │
+  │  3. 📜 DATA COMPLIANCE    GDPR says EU user data stays in EU    │
   │                            Indian data stays in India           │
   │                            US data stays in US                  │
   └─────────────────────────────────────────────────────────────────┘
