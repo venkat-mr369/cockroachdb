@@ -165,16 +165,16 @@ An online store like **Amazon, Flipkart, or Zalando** serving customers across E
        │                        │                         │
        ▼                        ▼                         ▼
   ┌──────────┐           ┌──────────┐              ┌──────────┐
-  │  App      │           │  App      │              │  App      │
-  │  Server   │           │  Server   │              │  Server   │
-  │  Paris    │           │  US-East  │              │  Mumbai   │
+  │  App      │          │  App      │             │  App      │
+  │  Server   │          │  Server   │             │  Server   │
+  │  Paris    │          │  US-East  │             │  Mumbai   │
   └────┬─────┘           └────┬─────┘              └────┬─────┘
        │                      │                         │
        ▼                      ▼                         ▼
   ┌──────────┐           ┌──────────┐              ┌──────────┐
-  │  CockroachDB          │  CockroachDB             │  CockroachDB
-  │  Paris Nodes│          │  US Nodes  │             │  Mumbai Nodes
-  │  (3 nodes) │          │  (3 nodes) │             │  (3 nodes)│
+  │  CockroachDB         │  CockroachDB            │  CockroachDB
+  │  Paris Nodes│        │  US Nodes  │            │  Mumbai Nodes
+  │  (3 nodes) │         │  (3 nodes) │            │  (3 nodes)│
   └──────────┘           └──────────┘              └──────────┘
        │                      │                         │
        └──────────────────────┼─────────────────────────┘
