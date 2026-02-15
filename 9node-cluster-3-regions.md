@@ -1,4 +1,4 @@
-complete multi-region CockroachDB 9-node cluster guide. It covers everything end-to-end:
+Complete multi-region CockroachDB 9-node cluster guide. you can find end-to-end:
 
 **3 Regions fully set up with AWS CLI:**
 - 🇫🇷 Paris (eu-west-3) — Nodes 1-3
