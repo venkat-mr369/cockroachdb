@@ -1,6 +1,6 @@
 ### CockroachDB Administration (DBA) Master Course
 
-### Duration: 40–60 Hours
+### Duration: 35–40 Hours
 
 ### Target Audience
 
