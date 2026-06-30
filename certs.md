@@ -6,7 +6,7 @@
 
 ---
 
-### CockroachDB Certificate Files Explained
+### Explanation of CockroachDB Certificate Files 
 
 You have **5 certificate files** in `/var/lib/cockroach/certs/`.
 
