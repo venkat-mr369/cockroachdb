@@ -385,7 +385,7 @@ This uniqueness is what allows CockroachDB to securely identify each node and es
 
 ---
 
-"Why shouldn't we copy ca.key to all database servers? I created it here on Node1, so what's the reason?"
+## "Why shouldn't we copy ca.key to all database servers? I created it here on Node1, so what's the reason?"
 
 ## Short Answer
 
