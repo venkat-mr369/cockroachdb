@@ -653,9 +653,7 @@ cockroach cert create-client
 
 ---
 
-## Recommendation for your course
 
-Since your audience is learning CockroachDB, I'd explicitly state:
 
 > **Lab Environment**
 >
