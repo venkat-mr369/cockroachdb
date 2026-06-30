@@ -26,7 +26,7 @@ It signs and validates every node certificate and client certificate.
 
 Every CockroachDB node uses the **same `ca.crt`**.
 
-### Real-Life Example
+### Real-time Example
 
 Think of it as the **government passport authority**.
 
