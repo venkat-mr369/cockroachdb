@@ -1,141 +1,384 @@
+**3-node CockroachDB cluster**:
+
+* **Node 1:** `10.10.10.11`
+* **Node 2:** `10.10.10.12`
+* **Node 3:** `10.10.10.13`
+
+---
+
 ### CockroachDB Certificate Files Explained
 
-You have 5 files in `/var/lib/cockroach/certs/`. Think of them like **ID cards and locks** for your cluster.
+You have **5 certificate files** in `/var/lib/cockroach/certs/`.
+
+Think of them as **identity cards and security keys** that allow CockroachDB nodes and clients to trust each other using **Mutual TLS (mTLS)**.
 
 ---
 
-### 1. `ca.crt` (Certificate Authority Certificate)
+## 1. `ca.crt` (Certificate Authority Certificate)
 
-**What:** The **boss certificate** — like a company stamp. It signs and verifies all other certificates.
+### What is it?
 
-**Who has it:** ALL 3 nodes (db1, db2, db3) get the **same copy**
+The **Certificate Authority (CA)** certificate is the **root of trust** for the entire CockroachDB cluster.
 
-**Real life example:** Like a university seal — every degree (node cert, client cert) has this seal to prove it's genuine.
+It signs and validates every node certificate and client certificate.
 
-```
+### Who has it?
+
+Every CockroachDB node uses the **same `ca.crt`**.
+
+### Real-Life Example
+
+Think of it as the **government passport authority**.
+
+Every passport (certificate) is trusted because it was issued by the same authority.
+
+```text
 ca.crt (SAME file on all 3 nodes)
-  ├── db1 (10.0.1.220) ✅ has ca.crt
-  ├── db2 (10.0.2.43)  ✅ has ca.crt
-  └── db3 (10.0.3.241) ✅ has ca.crt
+
+        Certificate Authority
+                 │
+        ┌────────┼────────┐
+        │        │        │
+        ▼        ▼        ▼
+Node1           Node2           Node3
+10.10.10.11     10.10.10.12     10.10.10.13
+     ✅              ✅              ✅
 ```
 
 ---
 
-### 2. `node.crt` (Node Certificate)
+## 2. `node.crt` (Node Certificate)
 
-**What:** This node's **identity card** — proves "I am db1 at 10.0.1.220"
+### What is it?
 
-**Who has it:** Each node has its **OWN unique** node.crt
+The **identity certificate** of a CockroachDB node.
 
-**Real life example:** Like your employee ID badge — db1's badge says "I work at 10.0.1.220", db2's says "I work at 10.0.2.43"
+It tells other nodes:
 
+> "I am Node1 running at 10.10.10.11."
+
+### Who has it?
+
+Each node has its **own unique node certificate**.
+
+### Real-Life Example
+
+Think of it as an **employee ID card**.
+
+Every employee has a different ID card.
+
+```text
+node.crt (DIFFERENT on every node)
+
+Node1
+10.10.10.11
+    │
+    └── node.crt (Issued for Node1)
+
+Node2
+10.10.10.12
+    │
+    └── node.crt (Issued for Node2)
+
+Node3
+10.10.10.13
+    │
+    └── node.crt (Issued for Node3)
 ```
-node.crt (DIFFERENT on each node)
-  ├── db1 → signed for 10.0.1.220
-  ├── db2 → signed for 10.0.2.43    (different file!)
-  └── db3 → signed for 10.0.3.241   (different file!)
+
+### Linux Permission
+
+```text
+-rw-r--r--
 ```
 
-**Permission:** `-rw-r--r--` (readable by all — this is public info)
+Public certificate (safe to read).
 
 ---
 
-### 3. `node.key` (Node Private Key)
+## 3. `node.key` (Node Private Key)
 
-**What:** This node's **secret password** — used to prove the node.crt is real
+### What is it?
 
-**Who has it:** Each node has its **OWN unique** node.key
+The **private key** corresponding to `node.crt`.
 
-**Real life example:** Like the PIN for your employee badge — only you know it
+It proves that the node really owns its certificate.
 
+### Who has it?
+
+Each node has its **own private key**.
+
+### Real-Life Example
+
+Think of it as the **PIN number** for your employee ID card.
+
+Only you should know it.
+
+```text
+node.key (DIFFERENT on every node)
+
+Node1
+10.10.10.11
+    │
+    └── node.key
+
+Node2
+10.10.10.12
+    │
+    └── node.key
+
+Node3
+10.10.10.13
+    │
+    └── node.key
 ```
-node.key (DIFFERENT on each node, KEEP SECRET)
-  ├── db1 → private key for 10.0.1.220
-  ├── db2 → private key for 10.0.2.43
-  └── db3 → private key for 10.0.3.241
+
+### Linux Permission
+
+```text
+-rw-------
 ```
 
-**Permission:** `-rw-------` (only owner can read — **secret!**)
+Only the owner should have permission.
 
 ---
 
-### 4. `client.root.crt` (Root Client Certificate)
+## 4. `client.root.crt` (Root Client Certificate)
 
-**What:** Identity card for the **root user** (admin). Used when you run `cockroach sql` or `cockroach init`
+### What is it?
 
-**Who has it:** ALL 3 nodes get the **same copy** (so you can run admin commands from any node)
+Identity certificate for the **root database administrator**.
 
-**Real life example:** Like a master admin keycard that opens all doors
+It is used whenever you execute CockroachDB administrative commands.
 
+### Who has it?
+
+The **same copy** is available on all three nodes.
+
+### Real-Life Example
+
+Think of it as the **Master Administrator ID Card**.
+
+You can administer the cluster from any node.
+
+```text
+client.root.crt (SAME on all nodes)
+
+Node1
+10.10.10.11
+
+Node2
+10.10.10.12
+
+Node3
+10.10.10.13
+
+Used by:
+
+cockroach sql
+cockroach init
+cockroach node status
+cockroach node ls
 ```
-client.root.crt (SAME file on all 3 nodes)
-  Used when you run:
-  → cockroach sql --certs-dir=certs
-  → cockroach init --certs-dir=certs
-  → cockroach node status --certs-dir=certs
+
+### Linux Permission
+
+```text
+-rw-r--r--
 ```
 
-**Permission:** `-rw-r--r--` (readable by all — public info)
+Public certificate.
 
 ---
 
-### 5. `client.root.key` (Root Client Private Key)
+## 5. `client.root.key` (Root Client Private Key)
 
-**What:** **Secret password** for the root client certificate
+### What is it?
 
-**Who has it:** ALL 3 nodes get the **same copy**
+Private key used together with `client.root.crt`.
 
-**Real life example:** The PIN for the master admin keycard
+Without this file, the administrator cannot authenticate.
 
-**Permission:** `-rw-------` (only owner can read — **secret!**)
+### Who has it?
+
+The **same copy** exists on all nodes.
+
+### Real-Life Example
+
+Think of it as the **PIN number** for the Master Administrator ID card.
+
+Only trusted administrators should have access.
+
+### Linux Permission
+
+```text
+-rw-------
+```
+
+Private and confidential.
 
 ---
 
-## How They Work Together
+# How the Certificates Work Together
 
+## Node-to-Node Communication
+
+Suppose **Node2** wants to communicate with **Node1**.
+
+```text
+Node2 (10.10.10.12)
+        │
+        │ "Hello Node1"
+        │
+        │ Sends node.crt
+        ▼
+Node1 (10.10.10.11)
+
+Step 1:
+Node1 checks
+
+"Was this certificate signed by ca.crt?"
+
+          YES ✅
+
+Step 2:
+Node1 asks
+
+"Prove you own this certificate."
+
+Node2 signs the challenge using
+
+node.key
+
+Step 3:
+Verification Successful
+
+Node1 trusts Node2
+
+Secure communication begins.
 ```
-When db2 connects to db1:
 
-db2 says: "Hi db1, here's my node.crt"
-db1 checks: "Is this signed by ca.crt?" ✅ Yes
-db1 says: "Prove it — use your node.key"
-db2 proves: (signs a challenge with node.key) ✅ Verified
-db1 says: "Welcome db2!"
+Exactly the same process happens when Node1 connects to Node2 or Node3.
 
-Same happens in reverse — db1 proves itself to db2.
-This is called MUTUAL TLS (mTLS).
+This authentication is called:
+
+> **Mutual TLS (mTLS)**
+
+Both sides authenticate each other.
+
+---
+
+# Administrator Connection
+
+When the DBA runs:
+
+```bash
+cockroach sql \
+    --certs-dir=/var/lib/cockroach/certs \
+    --host=10.10.10.11
 ```
 
-```
-When you run cockroach sql:
+CockroachDB performs the following verification.
 
-You say: "Here's my client.root.crt"
-Node checks: "Signed by ca.crt?" ✅ Yes
-Node says: "Prove it"
-You prove: (uses client.root.key) ✅ Verified
-Node says: "Welcome root user!"
+```text
+Administrator
+
+client.root.crt
+        │
+        ▼
+
+Node1
+
+Step 1
+
+Checks
+
+Signed by ca.crt ?
+
+YES ✅
+
+Step 2
+
+Prove ownership
+
+Administrator uses
+
+client.root.key
+
+Step 3
+
+Authentication Successful
+
+Welcome root user.
 ```
 
 ---
 
-## What Each Node Should Have
+# Certificate Distribution Across the Cluster
 
-| File | db1 (10.0.1.220) | db2 (10.0.2.43) | db3 (10.0.3.241) | Same or Different? |
-|------|:-:|:-:|:-:|---|
-| ca.crt | ✅ | ✅ | ✅ | **Same** on all |
-| node.crt | ✅ | ✅ | ✅ | **Different** on each |
-| node.key | ✅ | ✅ | ✅ | **Different** on each |
-| client.root.crt | ✅ | ✅ | ✅ | **Same** on all |
-| client.root.key | ✅ | ✅ | ✅ | **Same** on all |
+| File              | Node1 (10.10.10.11) | Node2 (10.10.10.12) | Node3 (10.10.10.13) | Same / Different |
+| ----------------- | :-----------------: | :-----------------: | :-----------------: | ---------------- |
+| `ca.crt`          |          ✅          |          ✅          |          ✅          | **Same**         |
+| `node.crt`        |          ✅          |          ✅          |          ✅          | **Different**    |
+| `node.key`        |          ✅          |          ✅          |          ✅          | **Different**    |
+| `client.root.crt` |          ✅          |          ✅          |          ✅          | **Same**         |
+| `client.root.key` |          ✅          |          ✅          |          ✅          | **Same**         |
 
 ---
 
-## Security Rules
+# Security Rules
 
-```
-.key files  → KEEP SECRET  → chmod 600 (only owner reads)
-.crt files  → PUBLIC info  → chmod 644 (anyone can read)
-certs/ dir  → PROTECTED    → chmod 700 (only owner enters)
+```text
+Private Keys (.key)
+
+node.key
+client.root.key
+
+Permission
+
+chmod 600
+
+Only the owner should have read/write access.
+
+--------------------------------------------
+
+Certificates (.crt)
+
+ca.crt
+node.crt
+client.root.crt
+
+Permission
+
+chmod 644
+
+Safe to read by everyone.
+
+--------------------------------------------
+
+Certificate Directory
+
+/var/lib/cockroach/certs
+
+Permission
+
+chmod 700
+
+Only the CockroachDB service account should access this directory.
 ```
 
-If permissions are wrong, CockroachDB will refuse to start with "permission denied" errors — that's by design for security.
+---
+
+# Important Note
+
+Only **`ca.crt`**, **`client.root.crt`**, and **`client.root.key`** are identical across all nodes.
+
+Each node must have its **own unique** `node.crt` and `node.key`, generated specifically for that node's hostname and IP addresses.
+
+For example:
+
+* **Node1 (10.10.10.11)** → `node.crt` contains `10.10.10.11`
+* **Node2 (10.10.10.12)** → `node.crt` contains `10.10.10.12`
+* **Node3 (10.10.10.13)** → `node.crt` contains `10.10.10.13`
+
+This uniqueness is what allows CockroachDB to securely identify each node and establish trusted communication within the cluster.
