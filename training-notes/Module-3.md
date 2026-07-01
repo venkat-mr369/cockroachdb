@@ -14,7 +14,7 @@ Key idea: **any node can serve any query** — there's no single "master" node f
 
 Layers (top to bottom):
 ```
-SQL Layer        <- parses/plans/executes SQL, talks to KV via SQL-to-KV mapping
+SQL Layer        <- parses/plans/executes SQL, talks to KV via SQL-to-KV (Key-Value) mapping
 Transaction Layer <- ACID guarantees, MVCC, timestamps
 Distribution Layer (DistSender) <- routes KV requests to the right range/replica
 Replication Layer <- Raft consensus across replicas
