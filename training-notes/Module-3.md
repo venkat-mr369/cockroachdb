@@ -1,6 +1,6 @@
 ## Module 3: Cockroachdb Distributed Architecture
 
-**Now** `node1` (`oel9-n1`) is currently running as a `start-single-node` instance. `node2` (`oel9-n2`) and `node3` (`oel9-n3`) will join later to form a proper 3-node cluster. 
+**Now** `node1` (`oel9-n1`) is currently running as a `start-single-node` instance. `node2` (`oel9-n2`) and `node3` (`oel9-n3`) will join later to form a proper **3-node cluster**. 
 
 This module 3 + verification commands you can run **now on node1 alone** (`oel9-n1`), and a we will have separate section of commands to run **after node2/node3 join**.
 
@@ -11,6 +11,8 @@ This module 3 + verification commands you can run **now on node1 alone** (`oel9-
 CockroachDB is a distributed SQL database: data is automatically split, replicated, and distributed across nodes, but presents a single logical SQL interface to clients (like talking to one big Postgres-compatible database).
 
 There is no dedicated master node that all clients must connect to. Every CockroachDB node can act as a gateway node. Clients may connect to any node in the cluster, and that node automatically coordinates with the KV layer, leaseholders, and the Raft protocol to locate the required data and execute the request. This happens regardless of which node physically stores the data, making the cluster appear as a single logical database to applications.
+
+
 
 Layers (top to bottom):
 ```
@@ -47,7 +49,15 @@ Storage Layer     <- Pebble (LSM-tree) key-value storage engine on disk
                Physical Disk
 ```
 ---
-
+### **Key Components**
+| Component  | Description |
+|------------|------------|
+| **Nodes**  | Independent servers running CockroachDB. |
+| **Ranges** | Data is split into **512 MiB** chunks (**ranges**) for distribution. |
+| **Leases** | Each range has a **leaseholder node** that coordinates reads/writes. |
+| **Replicas** | Each range is replicated across multiple nodes for fault tolerance. |
+| **KV Store** | Data is stored as key-value pairs but accessed via SQL. |
+---
 ## 2. Node Architecture
 
 A **node** = one running `cockroach` process (one OS process per machine/VM, usually).
