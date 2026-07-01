@@ -10,7 +10,7 @@ This module 3 + verification commands you can run **now on node1 alone** (`oel9-
 
 CockroachDB is a distributed SQL database: data is automatically split, replicated, and distributed across nodes, but presents a single logical SQL interface to clients (like talking to one big Postgres-compatible database).
 
-Key idea: **any node can serve any query** — there's no single "master" node for reads/writes. A client can connect to any node, and that node coordinates with others (via KV layer + Raft) to fetch/write data, regardless of where the data physically lives.
+There is no dedicated master node that all clients must connect to. Every CockroachDB node can act as a gateway node. Clients may connect to any node in the cluster, and that node automatically coordinates with the KV layer, leaseholders, and the Raft protocol to locate the required data and execute the request. This happens regardless of which node physically stores the data, making the cluster appear as a single logical database to applications.
 
 Layers (top to bottom):
 ```
@@ -20,6 +20,32 @@ Distribution Layer (DistSender) <- routes KV requests to the right range/replica
 Replication Layer <- Raft consensus across replicas
 Storage Layer     <- Pebble (LSM-tree) key-value storage engine on disk
 ```
+               
+                Client / Application
+                        │
+                        ▼
+                  SQL Layer
+         (Parser, Optimizer, Executor)
+                        │
+                        ▼
+              Transaction Layer
+       (ACID, MVCC, Timestamp Management)
+                        │
+                        ▼
+      Distribution Layer (DistSender)
+   (Range Lookup, Leaseholder Routing)
+                        │
+                        ▼
+          Replication Layer (Raft)
+ (Consensus, Replication, Leader Election)
+                        │
+                        ▼
+             Storage Layer (Pebble)
+   (WAL, MemTable, SSTables, LSM Tree)
+                        │
+                        ▼
+               Physical Disk
+               
 <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/cd6dbde0-9d65-4956-a1a2-a22d902ce570" />
 
 
