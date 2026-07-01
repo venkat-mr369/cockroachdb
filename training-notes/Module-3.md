@@ -1,6 +1,6 @@
 ## Module 3: Cockroachdb Distributed Architecture
 
-**Setup context:** `node1` (`oel9-n1`) is currently running as a `start-single-node` instance. `node2` (`oel9-n2`) and `node3` (`oel9-n3`) will join later to form a proper 3-node cluster. 
+**Now** `node1` (`oel9-n1`) is currently running as a `start-single-node` instance. `node2` (`oel9-n2`) and `node3` (`oel9-n3`) will join later to form a proper 3-node cluster. 
 
 This module 3 + verification commands you can run **now on node1 alone** (`oel9-n1`), and a we will have separate section of commands to run **after node2/node3 join**.
 
@@ -48,11 +48,6 @@ Storage Layer     <- Pebble (LSM-tree) key-value storage engine on disk
 ```
 ---
 
-<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/cd6dbde0-9d65-4956-a1a2-a22d902ce570" />
-
-
----
-
 ## 2. Node Architecture
 
 A **node** = one running `cockroach` process (one OS process per machine/VM, usually).
@@ -61,7 +56,7 @@ Each node contains:
 - One or more **stores** (each store = one directory/disk, backed by Pebble)
 - A **KV server** (handles Raft, range routing)
 - A **SQL server / gateway** (accepts client SQL connections)
-- Internal gossip client (talks to other nodes)
+- Internal gossip client (talks(communicates) to other nodes like Node2 and Nod3)
 
 A node is identified by a **Node ID** (integer, assigned on first join, permanent for that node's lifetime).
 
@@ -135,7 +130,7 @@ cockroach sql --certs-dir=/var/lib/cockroach/certs --host=localhost \
 
 ## 5. Key-Value (KV) Layer
 
-Underneath SQL, everything is stored as ordered key-value pairs. SQL tables/indexes/rows are encoded into keys (table ID + index ID + primary key values) and values (encoded column data). This is what lets CockroachDB shard/distribute/replicate data generically, without knowing "SQL semantics" at that layer.
+When you create a table and insert data, you see rows and columns, but CockroachDB stores the data differently behind the scenes. It converts every row into a key-value pair and keeps the keys in sorted order. This makes it easy to split, distribute, and replicate data across multiple nodes. The storage layer doesn't know anything about SQL tables or columns; it simply stores and retrieves key-value pairs. The SQL layer acts as a translator between the SQL commands you write and the key-value data stored on disk.
 
 ### Command to see KV encoding conceptually
 ```bash
