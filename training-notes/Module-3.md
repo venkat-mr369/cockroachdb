@@ -1,4 +1,4 @@
-# Module 3: CockroachDB Architecture — Study Notes
+# Module 3: CockroachDB Architecture
 
 **Setup context:** `node1` (`oel9-n1`) is currently running as a `start-single-node` instance. `node2` and `node3` will join later to form a proper 3-node cluster. This doc has concept notes + verification commands you can run **now on node1 alone**, and a separate section of commands to run **after node2/node3 join**.
 
