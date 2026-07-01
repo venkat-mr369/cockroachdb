@@ -45,7 +45,7 @@ Storage Layer     <- Pebble (LSM-tree) key-value storage engine on disk
                         │
                         ▼
                Physical Disk
-               
+```
 <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/cd6dbde0-9d65-4956-a1a2-a22d902ce570" />
 
 
