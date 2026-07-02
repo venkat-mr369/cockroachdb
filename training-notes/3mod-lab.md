@@ -55,8 +55,7 @@ FROM generate_series(1,1000000) id;
 Verify
 
 ```sql
-SELECT COUNT(*)
-FROM employee;
+SELECT COUNT(*) FROM employee;
 ```
 
 Expected
@@ -81,8 +80,7 @@ FROM generate_series(1000001,2000000) id;
 Verify
 
 ```sql
-SELECT COUNT(*)
-FROM employee;
+SELECT COUNT(*) FROM employee;
 ```
 
 Expected
@@ -96,11 +94,7 @@ Expected
 ### Lab 4 – Explain Plan
 
 ```sql
-EXPLAIN
-
-SELECT *
-FROM employee
-WHERE emp_id=1500000;
+EXPLAIN SELECT * FROM employee WHERE emp_id=1500000;
 ```
 
 Explain
@@ -116,8 +110,7 @@ Explain
 ```sql
 EXPLAIN (DISTSQL)
 
-SELECT *
-FROM employee;
+SELECT * FROM employee;
 ```
 
 ---
@@ -125,8 +118,7 @@ FROM employee;
 ### Lab 6 – Show Ranges
 
 ```sql
-SHOW RANGES
-FROM TABLE employee;
+SHOW RANGES FROM TABLE employee;
 ```
 
 Observe
@@ -142,8 +134,7 @@ Observe
 ### Lab 7 – Runtime Information
 
 ```sql
-SELECT *
-FROM crdb_internal.node_runtime_info;
+SELECT * FROM crdb_internal.node_runtime_info;
 ```
 
 Useful columns
@@ -157,8 +148,7 @@ Useful columns
 ### Lab 8 – Store Information
 
 ```sql
-SELECT *
-FROM crdb_internal.kv_store_status;
+SELECT * FROM crdb_internal.kv_store_status;
 ```
 
 Observe
