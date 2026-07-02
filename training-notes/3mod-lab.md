@@ -4,15 +4,15 @@ here its contains only **practical notes**, **queries**, and **verification comm
 
 ---
 
-# 3.5 Storage Layer – DBA Lab
+### Storage Layer – Lab
 
-## Objective
+### Objective
 
 Understand how CockroachDB stores data internally and verify storage behavior using SQL and operating system commands.
 
 ---
 
-# Lab 1 – Create Sample Database
+### Lab 1 – Create Sample Database
 
 ```sql
 CREATE DATABASE ams;
@@ -39,7 +39,7 @@ SHOW CREATE TABLE employee;
 
 ---
 
-# Lab 2 – Load Data
+### Lab 2 – Load Data
 
 Insert 1 Million rows
 
@@ -67,7 +67,7 @@ Expected
 
 ---
 
-# Lab 3 – Insert More Data
+### Lab 3 – Insert More Data
 
 ```sql
 INSERT INTO employee
@@ -93,7 +93,7 @@ Expected
 
 ---
 
-# Lab 4 – Explain Plan
+### Lab 4 – Explain Plan
 
 ```sql
 EXPLAIN
@@ -111,7 +111,7 @@ Explain
 
 ---
 
-# Lab 5 – DistSQL
+### Lab 5 – DistSQL
 
 ```sql
 EXPLAIN (DISTSQL)
@@ -122,7 +122,7 @@ FROM employee;
 
 ---
 
-# Lab 6 – Show Ranges
+### Lab 6 – Show Ranges
 
 ```sql
 SHOW RANGES
@@ -139,7 +139,7 @@ Observe
 
 ---
 
-# Lab 7 – Runtime Information
+### Lab 7 – Runtime Information
 
 ```sql
 SELECT *
@@ -154,7 +154,7 @@ Useful columns
 
 ---
 
-# Lab 8 – Store Information
+### Lab 8 – Store Information
 
 ```sql
 SELECT *
@@ -170,7 +170,7 @@ Observe
 
 ---
 
-# Lab 9 – Database Size
+### Lab 9 – Database Size
 
 Linux
 
@@ -186,7 +186,7 @@ du -sh /var/lib/cockroach/data/*
 
 ---
 
-# Lab 10 – Cockroach Process
+### Lab 10 – Cockroach Process
 
 ```bash
 ps -ef | grep cockroach
@@ -194,7 +194,7 @@ ps -ef | grep cockroach
 
 ---
 
-# Lab 11 – Open Files
+### Lab 11 – Open Files
 
 ```bash
 lsof -p $(pidof cockroach)
@@ -204,7 +204,7 @@ Useful for explaining that Pebble keeps multiple SSTable files open.
 
 ---
 
-# Lab 12 – Disk Usage
+### Lab 12 – Disk Usage
 
 ```bash
 df -h
@@ -218,7 +218,7 @@ ls -lh /var/lib/cockroach/data
 
 ---
 
-# Lab 13 – Monitor Storage Growth
+### Lab 13 – Monitor Storage Growth
 
 ```bash
 watch -n 2 "du -sh /var/lib/cockroach/data"
@@ -228,7 +228,7 @@ Students can watch storage grow during inserts.
 
 ---
 
-# Lab 14 – CPU Utilization
+### Lab 14 – CPU Utilization
 
 ```bash
 top
@@ -242,7 +242,7 @@ htop
 
 ---
 
-# Lab 15 – Disk I/O
+### Lab 15 – Disk I/O
 
 ```bash
 iostat -x 2
@@ -256,7 +256,7 @@ Explain
 
 ---
 
-# Lab 16 – Current Sessions
+### Lab 16 – Current Sessions
 
 ```sql
 SHOW SESSIONS;
@@ -264,7 +264,7 @@ SHOW SESSIONS;
 
 ---
 
-# Lab 17 – Current Queries
+### Lab 17 – Current Queries
 
 ```sql
 SHOW CLUSTER QUERIES;
@@ -276,7 +276,7 @@ students can see the running INSERT.
 
 ---
 
-# Lab 18 – Jobs
+### Lab 18 – Jobs
 
 ```sql
 SHOW JOBS;
@@ -293,7 +293,7 @@ Background jobs
 
 ---
 
-# Lab 19 – Cluster Settings
+### Lab 19 – Cluster Settings
 
 ```sql
 SHOW CLUSTER SETTINGS;
@@ -319,7 +319,7 @@ Explain
 
 ---
 
-# Lab 20 – Session Variables
+### Lab 20 – Session Variables
 
 ```sql
 SHOW ALL;
@@ -347,7 +347,7 @@ Students observe that it returns to **ON**, demonstrating that it is a session-l
 
 ---
 
-# Lab 21 – Storage Monitoring Commands
+### Lab 21 – Storage Monitoring Commands
 
 ```bash
 systemctl status cockroach
@@ -369,7 +369,7 @@ ps -ef | grep cockroach
 
 ---
 
-# DBA Interview Questions
+### DBA Interview Questions
 
 ### Q1
 
@@ -416,8 +416,7 @@ du -sh /var/lib/cockroach/data
 How do you view storage information?
 
 ```sql
-SELECT *
-FROM crdb_internal.kv_store_status;
+SELECT * FROM crdb_internal.kv_store_status;
 ```
 
 ---
@@ -427,12 +426,10 @@ FROM crdb_internal.kv_store_status;
 Where are Cluster Settings stored?
 
 ```sql
-SELECT *
-FROM system.settings;
+SELECT * FROM system.settings;
 ```
 
 Only overridden settings are persisted; default values are built into the CockroachDB binary.
 
 ---
 
-This approach avoids duplicating the theory you already have in Module 3 and instead gives students a **DBA lab manual**. Every concept is immediately followed by verification commands, which is much more valuable in an enterprise training course.
