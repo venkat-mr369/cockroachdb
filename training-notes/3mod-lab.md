@@ -1,10 +1,6 @@
-Yes. I reviewed your Module 3 document. 
+## **Module 3 – Storage Layer (Hands-on Lab)**
 
-Since you **already have the architecture**, I would **not repeat** the Storage Layer explanation there. Instead, add a separate section called:
-
-# **Module 3.5 – Storage Layer (Hands-on Labs & DBA Verification)**
-
-This section should contain only **practical notes**, **queries**, and **verification commands**.
+here its contains only **practical notes**, **queries**, and **verification commands**.
 
 ---
 
