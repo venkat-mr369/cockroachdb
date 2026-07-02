@@ -22,6 +22,14 @@ Distribution Layer (DistSender) <- routes KV requests to the right range/replica
 Replication Layer <- Raft consensus across replicas
 Storage Layer     <- Pebble (LSM-tree) key-value storage engine on disk
 ```
+
++ Understands your SQL.
++ Protects your transaction.
++ Finds the correct node.
++ Synchronizes replicas.
++ Writes data safely to storage.
++ Returns **Success**.
+
 ```bash              
                 Client / Application
                         │
@@ -48,6 +56,7 @@ Storage Layer     <- Pebble (LSM-tree) key-value storage engine on disk
                         ▼
                Physical Disk
 ```
+
 ---
 ### **Key Components**
 | Component  | Description |
