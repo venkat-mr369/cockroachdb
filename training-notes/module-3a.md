@@ -250,6 +250,14 @@ No.
 
 The **512 MiB** is a **target size**, not a rule that says "exactly four ranges."
 
+✅ Range size (target around 512 MiB)
+✅ Write load (hot ranges)
+✅ Existing split points
+✅ Table/index boundaries
+✅ Manual splits
+✅ Load-based splitting
+✅ Internal balancing
+
 CockroachDB keeps ranges relatively small because:
 
 * Faster Raft replication
