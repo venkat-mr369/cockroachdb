@@ -1,10 +1,9 @@
-You're right. The previous list is more of an overview. For **enterprise CockroachDB training**, you should learn by exploring the internal metadata like a DBA. Below are **deeper queries** grouped by architecture. These are the kinds of queries you would use in a real cluster.
 
 > **Note:** Some `crdb_internal` views differ by CockroachDB version (v23.x, v24.x, v25.x). If a query isn't available, tell me your version (`SELECT version();`) and I can tailor them.
 
 ---
 
-# 1. Cluster Architecture
+## 1. Cluster Architecture
 
 ### Cluster ID
 
