@@ -1,10 +1,10 @@
-Since you're learning **CockroachDB internals**, after creating a large `employee` table, you can use the following **system tables**, **system views**, and **built-in commands** to understand the architecture.
+**CockroachDB internals**, after creating a large `employee` table, you can use the following **system tables**, **system views**, and **built-in commands** to understand the architecture.
 
 > **Note:** Your last query uses `database_name = 'office'`, but your database is `ams`. Replace `'office'` with `'ams'`.
 
 ---
 
-# 1. Cluster Architecture
+### 1. Cluster Architecture
 
 List all nodes in the cluster.
 
@@ -31,13 +31,21 @@ FROM crdb_internal.gossip_nodes;
 
 ---
 
-# 2. Node Architecture
+### 2. Node Architecture
+
 
 View node details.
+CockroachDB uses a gossip protocol to distribute cluster metadata among nodes. This includes information such as:
+
+    Which nodes are alive
+    Node addresses
+    Cluster ID
+    Liveness information
+    Range and store metadata
+    Other system configuration data
 
 ```sql
-SELECT *
-FROM crdb_internal.gossip_nodes;
+SELECT * FROM crdb_internal.gossip_nodes;
 ```
 
 ```sql
