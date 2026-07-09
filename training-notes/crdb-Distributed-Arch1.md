@@ -35,7 +35,7 @@ FROM crdb_internal.gossip_nodes;
 
 
 View node details.
-CockroachDB uses a gossip protocol to distribute cluster metadata among nodes. This includes information such as:
+CockroachDB uses a **gossip protocol** to distribute cluster metadata among nodes. This includes information such as:
 
 - Which nodes are alive
 - Node addresses
