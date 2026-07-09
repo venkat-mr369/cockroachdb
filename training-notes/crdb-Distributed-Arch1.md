@@ -37,35 +37,25 @@ FROM crdb_internal.gossip_nodes;
 View node details.
 CockroachDB uses a gossip protocol to distribute cluster metadata among nodes. This includes information such as:
 
-    Which nodes are alive
-    Node addresses
-    Cluster ID
-    Liveness information
-    Range and store metadata
-    Other system configuration data
+- Which nodes are alive
+- Node addresses
+- Cluster ID
+- Liveness information
+- Range and store metadata
+- Other system configuration data
 
 ```sql
 SELECT * FROM crdb_internal.gossip_nodes;
 ```
 
 ```sql
-SELECT
-node_id,
-network,
-address,
-attrs
-FROM crdb_internal.kv_node_status;
+SELECT node_id, network,address, attrs FROM crdb_internal.kv_node_status;
 ```
 
 Storage usage
 
 ```sql
-SELECT
-node_id,
-store_id,
-capacity,
-used
-FROM crdb_internal.kv_store_status;
+SELECT node_id,store_id,capacity,used FROM crdb_internal.kv_store_status;
 ```
 
 ---
@@ -73,20 +63,13 @@ FROM crdb_internal.kv_store_status;
 # 3. Stores
 
 ```sql
-SELECT *
-FROM crdb_internal.kv_store_status;
+SELECT * FROM crdb_internal.kv_store_status;
 ```
 
 Store capacity
 
 ```sql
-SELECT
-store_id,
-node_id,
-capacity,
-used,
-available
-FROM crdb_internal.kv_store_status;
+SELECT store_id,node_id,capacity,used,available FROM crdb_internal.kv_store_status;
 ```
 
 ---
@@ -118,13 +101,7 @@ SHOW TRANSACTIONS;
 Table ID
 
 ```sql
-SELECT
-table_id,
-database_name,
-schema_name,
-name
-FROM crdb_internal.tables
-WHERE database_name='ams';
+SELECT table_id, database_name,schema_name, name FROM crdb_internal.tables WHERE database_name='ams';
 ```
 
 KV statistics
@@ -146,10 +123,7 @@ SET DISTSQL = ON;
 See execution plan
 
 ```sql
-EXPLAIN ANALYZE
-SELECT *
-FROM employee
-WHERE salary > 50000;
+EXPLAIN ANALYZE SELECT * FROM employee WHERE salary > 50000;
 ```
 
 Execution diagram
@@ -162,7 +136,7 @@ FROM employee;
 
 ---
 
-# 7. Ranges
+### 7. Ranges
 
 View all ranges
 
@@ -178,7 +152,7 @@ SHOW RANGES FROM INDEX employee@primary;
 
 ---
 
-# 8. Range Splits
+### 8. Range Splits
 
 Current split points
 
@@ -189,8 +163,7 @@ SHOW RANGES FROM TABLE employee;
 Manual split
 
 ```sql
-ALTER TABLE employee
-SPLIT AT VALUES (500000);
+ALTER TABLE employee SPLIT AT VALUES (500000);
 ```
 
 Verify
@@ -213,7 +186,7 @@ Automatic merges happen in the background when adjacent ranges become small. You
 
 ---
 
-# 10. Replicas
+### 10. Replicas
 
 Replica information
 
@@ -224,13 +197,12 @@ SHOW RANGES FROM TABLE employee;
 or
 
 ```sql
-SELECT *
-FROM crdb_internal.ranges;
+SELECT * FROM crdb_internal.ranges;
 ```
 
 ---
 
-# 11. Leaseholders
+### 11. Leaseholders
 
 Current leaseholder
 
@@ -248,50 +220,45 @@ column.
 
 ---
 
-# 12. Gossip Protocol
+### 12. Gossip Protocol
 
 Nodes participating
 
 ```sql
-SELECT *
-FROM crdb_internal.gossip_nodes;
+SELECT * FROM crdb_internal.gossip_nodes;
 ```
 
 Cluster liveness
 
 ```sql
-SELECT *
-FROM crdb_internal.kv_node_liveness;
+SELECT * FROM crdb_internal.kv_node_liveness;
 ```
 
 ---
 
-# 13. Raft Consensus
+### 13. Raft Consensus
 
 Range information
 
 ```sql
-SELECT *
-FROM crdb_internal.ranges;
-```
+SELECT * FROM crdb_internal.ranges;
+``` 
 
 Raft status
 
 ```sql
-SELECT *
-FROM crdb_internal.kv_store_status;
+SELECT * FROM crdb_internal.kv_store_status;
 ```
 
 Per-node status
 
 ```sql
-SELECT *
-FROM crdb_internal.kv_node_status;
+SELECT * FROM crdb_internal.kv_node_status;
 ```
 
 ---
 
-# 14. Metadata Tables
+### 14. Metadata Tables
 
 Databases
 
@@ -320,44 +287,37 @@ SHOW INDEXES FROM employee;
 Internal tables
 
 ```sql
-SELECT *
-FROM crdb_internal.tables
-WHERE database_name='ams';
+SELECT * FROM crdb_internal.tables WHERE database_name='ams';
 ```
 
 Namespaces
 
 ```sql
-SELECT *
-FROM system.namespace;
+SELECT * FROM system.namespace;
 ```
 
 Descriptors
 
 ```sql
-SELECT *
-FROM system.descriptor;
+SELECT * FROM system.descriptor;
 ```
 
 Users
 
-```sql
-SELECT *
-FROM system.users;
+```sql 
+SELECT * FROM system.users;
 ```
 
 Jobs
 
 ```sql
-SELECT *
-FROM system.jobs;
+SELECT * FROM system.jobs;
 ```
 
 Events
 
 ```sql
-SELECT *
-FROM system.eventlog;
+SELECT * FROM system.eventlog;
 ```
 
 Zones
@@ -368,7 +328,7 @@ SHOW ZONE CONFIGURATIONS;
 
 ---
 
-# 15. Useful Monitoring Queries
+### 15. Useful Monitoring Queries
 
 Database sizes
 
@@ -391,14 +351,12 @@ SHOW CREATE TABLE employee;
 Query plan
 
 ```sql
-EXPLAIN ANALYZE
-SELECT COUNT(*)
-FROM employee;
+EXPLAIN ANALYZE SELECT COUNT(*) FROM employee;
 ```
 
 ---
 
-## Recommended learning order
+#### Recommended learning order
 
 1. Cluster Architecture
 2. Node Architecture
