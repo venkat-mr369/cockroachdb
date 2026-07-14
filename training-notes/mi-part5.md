@@ -321,4 +321,4 @@ At this stage:
 
 The cluster has **not** been initialized yet.
 
-In **Part 5**, you'll initialize the cluster with `cockroach init`, verify all three nodes, connect with the SQL shell, create a sample database and table, and validate the cluster through the CockroachDB Admin UI.
+In this  **Part 5**, you will initialize the cluster with `cockroach init`, verify all three nodes, connect with the SQL shell, create a sample database and table, and validate the cluster through the CockroachDB Admin UI.
