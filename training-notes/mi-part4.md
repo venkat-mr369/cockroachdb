@@ -20,24 +20,24 @@
 Node-1
 
 ```bash
-ssh -i ~/.ssh/id_rsa ubuntu@<NODE1_PUBLIC_IP>
+ssh -i ~/.ssh/id_rsa ubuntu@3.110.226.138 
 ```
 
 Node-2
 
 ```bash
-ssh -i ~/.ssh/id_rsa ubuntu@<NODE2_PUBLIC_IP>
+ssh -i ~/.ssh/id_rsa ubuntu@13.201.227.212
 ```
 
 Node-3
 
 ```bash
-ssh -i ~/.ssh/id_rsa ubuntu@<NODE3_PUBLIC_IP>
+ssh -i ~/.ssh/id_rsa ubuntu@3.111.218.94
 ```
 
 ---
 
-## Step 34: Update Ubuntu
+### Step 34: Update Ubuntu
 
 ```bash
 sudo apt update
@@ -72,7 +72,7 @@ wget --version
 
 ---
 
-## Step 36: Download CockroachDB
+### Step 36: Download CockroachDB
 
 ```bash
 cd /tmp
@@ -100,14 +100,10 @@ cockroach version
 
 ---
 
-## Step 37: Create CockroachDB User
+### Step 37: Create CockroachDB User
 
 ```bash
-sudo useradd \
---system \
---home /var/lib/cockroach \
---shell /bin/bash \
-cockroach
+sudo useradd --system --home /var/lib/cockroach --shell /bin/bash cockroach
 ```
 
 Verify
@@ -138,7 +134,7 @@ sudo ls -ld /var/lib/cockroach
 
 ---
 
-## Step 39: Configure Hostname
+### Step 39: Configure Hostname
 
 ### Node-1
 
