@@ -2,11 +2,20 @@
 
 ### Install and Configure CockroachDB on All Three Nodes (Manual)
 
-> Perform **Steps 33–44 on Node1, Node2, and Node3** unless noted otherwise.
-
 ---
+```
+----------------------------------
+|        DescribeInstances       |
++-------------+------------------+
+|    Name     |    PublicIP      |
++-------------+------------------+
+|  crdb-node3 |  3.110.226.138   |
+|  crdb-node2 |  13.201.227.212  |
+|  crdb-node1 |  3.111.218.94    |
++-------------+------------------+
+```
 
-## Step 33: SSH to the Server
+### Step 33: SSH to the Server
 
 Node-1
 
