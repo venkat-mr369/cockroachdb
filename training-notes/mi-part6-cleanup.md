@@ -1,5 +1,3 @@
-### AWS CLI Lab – Part 6
-
 ### Cleanup (Delete All AWS Resources)
 
 > **Delete resources in reverse order of creation** to avoid dependency errors.
@@ -29,30 +27,19 @@ sudo systemctl disable cockroach
 Find the instances.
 
 ```bash
-aws ec2 describe-instances \
-  --filters "Name=tag:Name,Values=crdb-node*" \
-  --query "Reservations[].Instances[].InstanceId" \
-  --output table
+aws ec2 describe-instances --filters "Name=tag:Name,Values=crdb-node*" --query "Reservations[].Instances[].InstanceId" --output table
 ```
 
 Terminate.
 
 ```bash
-aws ec2 terminate-instances \
-  --instance-ids \
-  $NODE1_INSTANCE \
-  $NODE2_INSTANCE \
-  $NODE3_INSTANCE
+aws ec2 terminate-instances --instance-ids $NODE1_INSTANCE $NODE2_INSTANCE $NODE3_INSTANCE
 ```
 
 Wait.
 
 ```bash
-aws ec2 wait instance-terminated \
-  --instance-ids \
-  $NODE1_INSTANCE \
-  $NODE2_INSTANCE \
-  $NODE3_INSTANCE
+aws ec2 wait instance-terminated --instance-ids $NODE1_INSTANCE $NODE2_INSTANCE $NODE3_INSTANCE
 ```
 
 ---
@@ -60,8 +47,7 @@ aws ec2 wait instance-terminated \
 ### Step 3: Delete Key Pair
 
 ```bash
-aws ec2 delete-key-pair \
-  --key-name crdb-key
+aws ec2 delete-key-pair --key-name crdb-key
 ```
 
 Verify.
@@ -75,8 +61,7 @@ aws ec2 describe-key-pairs
 ### Step 4: Delete Security Group
 
 ```bash
-aws ec2 delete-security-group \
-  --group-id $SG_ID
+aws ec2 delete-security-group --group-id $SG_ID
 ```
 
 ---
@@ -86,26 +71,26 @@ aws ec2 delete-security-group \
 Find Associations.
 
 ```bash
-aws ec2 describe-route-tables \
-  --route-table-ids $RT_ID
+aws ec2 describe-route-tables --route-table-ids $RT_ID
 ```
 
 Delete each association except the **Main** association.
 
 ```bash
-aws ec2 disassociate-route-table \
-  --association-id rtbassoc-xxxxxxxx
+aws ec2 disassociate-route-table --association-id rtbassoc-09f9a485c9fcf8c1e
 ```
 
 Repeat for all three subnet associations.
-
+```
+aws ec2 disassociate-route-table --association-id rtbassoc-0d5fba93703f6d454
+aws ec2 disassociate-route-table --association-id rtbassoc-088bc0f470bee4fe0
+```
 ---
 
 ### Step 6: Delete Route Table
 
 ```bash
-aws ec2 delete-route-table \
-  --route-table-id $RT_ID
+aws ec2 delete-route-table --route-table-id $RT_ID
 ```
 
 ---
@@ -115,22 +100,19 @@ aws ec2 delete-route-table \
 Subnet-1
 
 ```bash
-aws ec2 delete-subnet \
-  --subnet-id $SUBNET1
+aws ec2 delete-subnet --subnet-id $SUBNET1
 ```
 
 Subnet-2
 
 ```bash
-aws ec2 delete-subnet \
-  --subnet-id $SUBNET2
+aws ec2 delete-subnet --subnet-id $SUBNET2
 ```
 
 Subnet-3
 
 ```bash
-aws ec2 delete-subnet \
-  --subnet-id $SUBNET3
+aws ec2 delete-subnet --subnet-id $SUBNET3
 ```
 
 ---
@@ -138,9 +120,7 @@ aws ec2 delete-subnet \
 ### Step 8: Detach Internet Gateway
 
 ```bash
-aws ec2 detach-internet-gateway \
-  --internet-gateway-id $IGW_ID \
-  --vpc-id $VPC_ID
+aws ec2 detach-internet-gateway --internet-gateway-id $IGW_ID --vpc-id $VPC_ID
 ```
 
 ---
@@ -148,8 +128,7 @@ aws ec2 detach-internet-gateway \
 ### Step 9: Delete Internet Gateway
 
 ```bash
-aws ec2 delete-internet-gateway \
-  --internet-gateway-id $IGW_ID
+aws ec2 delete-internet-gateway --internet-gateway-id $IGW_ID
 ```
 
 ---
@@ -157,8 +136,7 @@ aws ec2 delete-internet-gateway \
 ### Step 10: Delete VPC
 
 ```bash
-aws ec2 delete-vpc \
-  --vpc-id $VPC_ID
+aws ec2 delete-vpc --vpc-id $VPC_ID
 ```
 
 ---
@@ -191,7 +169,7 @@ aws ec2 describe-key-pairs
 
 ---
 
-## Cleanup Order
+### Cleanup Order
 
 ```text
 Stop CockroachDB (Optional)
