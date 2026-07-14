@@ -243,4 +243,4 @@ You now have:
 * ✅ SSH connectivity
 * ✅ Inter-node network connectivity verified
 
-**Part 4** will cover installing CockroachDB on all three nodes, creating the `cockroach` user, directory structure, configuring `/etc/hosts`, creating the `systemd` service, starting the service, initializing the cluster, and verifying that all three nodes are healthy.
+
