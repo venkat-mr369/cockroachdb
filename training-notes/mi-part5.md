@@ -6,7 +6,7 @@
 
 ---
 
-## Step 33: SSH to the Server
+### Step 33: SSH to the Server
 
 Node-1
 
@@ -38,7 +38,7 @@ sudo apt upgrade -y
 
 ---
 
-## Step 35: Install Required Packages
+### Step 35: Install Required Packages
 
 ```bash
 sudo apt install -y \
@@ -63,7 +63,7 @@ wget --version
 
 ---
 
-## Step 36: Download CockroachDB
+### Step 36: Download CockroachDB
 
 ```bash
 cd /tmp
@@ -91,14 +91,10 @@ cockroach version
 
 ---
 
-## Step 37: Create CockroachDB User
+### Step 37: Create CockroachDB User
 
 ```bash
-sudo useradd \
---system \
---home /var/lib/cockroach \
---shell /bin/bash \
-cockroach
+sudo useradd --system --home /var/lib/cockroach --shell /bin/bash cockroach
 ```
 
 Verify
@@ -129,7 +125,7 @@ sudo ls -ld /var/lib/cockroach
 
 ---
 
-## Step 39: Configure Hostname
+### Step 39: Configure Hostname
 
 ### Node-1
 
@@ -220,7 +216,7 @@ JOIN_NODES=10.10.1.10:26257,10.10.2.10:26257,10.10.3.10:26257
 
 ---
 
-## Step 42: Create systemd Service
+### Step 42: Create systemd Service
 
 ```bash
 sudo vi /etc/systemd/system/cockroach.service
@@ -262,7 +258,7 @@ WantedBy=multi-user.target
 
 ---
 
-## Step 43: Enable and Start Service
+### Step 43: Enable and Start Service
 
 ```bash
 sudo systemctl daemon-reload
@@ -274,7 +270,7 @@ sudo systemctl start cockroach
 
 ---
 
-## Step 44: Verify Service (Run on All Three Nodes)
+### Step 44: Verify Service (Run on All Three Nodes)
 
 ```bash
 sudo systemctl status cockroach --no-pager
@@ -306,7 +302,7 @@ ss -lnt | grep 8080
 
 ---
 
-## End of Part 4
+### End of Part 4
 
 At this stage:
 
@@ -342,7 +338,7 @@ I'd revise **Part 5** like this.
 
 ---
 
-# Part 5 – Initialize and Verify CockroachDB Cluster
+### Initialize and Verify CockroachDB Cluster
 
 ## Step 45: Get Public IP Addresses
 
