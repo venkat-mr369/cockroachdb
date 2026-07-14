@@ -4,7 +4,7 @@
 
 > **Prerequisites**
 >
-> Complete **Part 1** and **Part 2**.
+> Completed **Part 1** and **Part 2**.
 >
 > Required variables:
 >
@@ -16,30 +16,23 @@
 
 ---
 
-## Step 23: Find Ubuntu 24.04 LTS AMI
+### Step 23: Find Ubuntu 24.04 LTS AMI
 
 ```bash
-aws ec2 describe-images \
-  --owners 099720109477 \
-  --filters \
-  "Name=name,Values=ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*" \
-  "Name=architecture,Values=x86_64" \
-  "Name=virtualization-type,Values=hvm" \
-  --query "Images | sort_by(@,&CreationDate)[-1].ImageId" \
-  --output text \
-  --region ap-south-1
+aws ec2 describe-images --owners 099720109477 --filters "Name=name,Values=ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*" "Name=architecture,Values=x86_64" "Name=virtualization-type,Values=hvm" --query "Images | sort_by(@,&CreationDate)[-1].ImageId" --output text --region ap-south-1
 ```
 
 Example:
 
 ```text
-ami-xxxxxxxxxxxxxxxxx
+ami-001e7cc215773c7fb
+
 ```
 
 Save it.
 
 ```bash
-export AMI_ID=ami-xxxxxxxxxxxxxxxxx
+export AMI_ID=ami-001e7cc215773c7fb
 ```
 
 Verify
@@ -50,116 +43,76 @@ echo $AMI_ID
 
 ---
 
-## Step 24: Import/Create Key Pair
+### Step 24: Import/Create Key Pair
 
 If you already have a public key:
 
 ```bash
-aws ec2 import-key-pair \
-  --key-name crdb-key \
-  --public-key-material fileb://~/.ssh/id_rsa.pub
+aws ec2 import-key-pair --key-name crdb-key --public-key-material fileb://C:/Users/venkat/.ssh/id_rsa.pub
 ```
 
 Verify
 
 ```bash
-aws ec2 describe-key-pairs \
-  --key-names crdb-key
+aws ec2 describe-key-pairs --key-names crdb-key
 ```
 
 ---
 
-## Step 25: Launch Node-1
+### Step 25: Launch Node-1
 
 ```bash
-aws ec2 run-instances \
-  --image-id $AMI_ID \
-  --instance-type t3.small \
-  --key-name crdb-key \
-  --security-group-ids $SG_ID \
-  --subnet-id $SUBNET1 \
-  --private-ip-address 10.10.1.10 \
-  --associate-public-ip-address \
-  --block-device-mappings '[{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":20,"VolumeType":"gp3","DeleteOnTermination":true}}]' \
-  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=crdb-node1}]'
+aws ec2 run-instances --image-id $AMI_ID --instance-type t3.small --key-name crdb-key --security-group-ids $SG_ID --subnet-id $SUBNET1 --private-ip-address 10.10.1.10 --associate-public-ip-address --block-device-mappings '[{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":20,"VolumeType":"gp3","DeleteOnTermination":true}}]' --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=crdb-node1}]'
 ```
 
 Save the Instance ID.
 
 ```bash
-export NODE1_INSTANCE=i-xxxxxxxxxxxxxxxxx
+export NODE1_INSTANCE=i-0f15abd95c4d61eca
 ```
 
 ---
 
-## Step 26: Launch Node-2
+### Step 26: Launch Node-2
 
 ```bash
-aws ec2 run-instances \
-  --image-id $AMI_ID \
-  --instance-type t3.small \
-  --key-name crdb-key \
-  --security-group-ids $SG_ID \
-  --subnet-id $SUBNET2 \
-  --private-ip-address 10.10.2.10 \
-  --associate-public-ip-address \
-  --block-device-mappings '[{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":20,"VolumeType":"gp3","DeleteOnTermination":true}}]' \
-  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=crdb-node2}]'
+aws ec2 run-instances --image-id $AMI_ID --instance-type t3.small --key-name crdb-key --security-group-ids $SG_ID --subnet-id $SUBNET2 --private-ip-address 10.10.2.10 --associate-public-ip-address --block-device-mappings '[{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":20,"VolumeType":"gp3","DeleteOnTermination":true}}]' --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=crdb-node2}]'
 ```
 
 Save the Instance ID.
 
 ```bash
-export NODE2_INSTANCE=i-xxxxxxxxxxxxxxxxx
+export NODE2_INSTANCE=i-08be3e8ab585b4ebe
 ```
 
 ---
 
-## Step 27: Launch Node-3
+### Step 27: Launch Node-3
 
 ```bash
-aws ec2 run-instances \
-  --image-id $AMI_ID \
-  --instance-type t3.small \
-  --key-name crdb-key \
-  --security-group-ids $SG_ID \
-  --subnet-id $SUBNET3 \
-  --private-ip-address 10.10.3.10 \
-  --associate-public-ip-address \
-  --block-device-mappings '[{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":20,"VolumeType":"gp3","DeleteOnTermination":true}}]' \
-  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=crdb-node3}]'
+aws ec2 run-instances --image-id $AMI_ID --instance-type t3.small --key-name crdb-key --security-group-ids $SG_ID --subnet-id $SUBNET3 --private-ip-address 10.10.3.10 --associate-public-ip-address --block-device-mappings '[{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":20,"VolumeType":"gp3","DeleteOnTermination":true}}]' --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=crdb-node3}]'
 ```
 
 Save the Instance ID.
 
 ```bash
-export NODE3_INSTANCE=i-xxxxxxxxxxxxxxxxx
+export NODE3_INSTANCE=i-0d2f5f03a2d80d1ed
 ```
 
 ---
 
-## Step 28: Wait for Instances
+### Step 28: Wait for Instances
 
 ```bash
-aws ec2 wait instance-running \
-  --instance-ids \
-  $NODE1_INSTANCE \
-  $NODE2_INSTANCE \
-  $NODE3_INSTANCE
+aws ec2 wait instance-running --instance-ids $NODE1_INSTANCE $NODE2_INSTANCE $NODE3_INSTANCE
 ```
 
 ---
 
-## Step 29: Verify Instances
+### Step 29: Verify Instances
 
 ```bash
-aws ec2 describe-instances \
-  --instance-ids \
-  $NODE1_INSTANCE \
-  $NODE2_INSTANCE \
-  $NODE3_INSTANCE \
-  --query "Reservations[].Instances[].{Name:Tags[?Key=='Name']|[0].Value,State:State.Name,PrivateIP:PrivateIpAddress,PublicIP:PublicIpAddress,AZ:Placement.AvailabilityZone}" \
-  --output table
+aws ec2 describe-instances --instance-ids $NODE1_INSTANCE $NODE2_INSTANCE $NODE3_INSTANCE --query "Reservations[].Instances[].{Name:Tags[?Key=='Name']|[0].Value,State:State.Name,PrivateIP:PrivateIpAddress,PublicIP:PublicIpAddress,AZ:Placement.AvailabilityZone}" --output table
 ```
 
 Expected
@@ -176,21 +129,18 @@ Expected
 
 ---
 
-## Step 30: Retrieve Public IPs
+### Step 30: Retrieve Public IPs
 
 ```bash
-aws ec2 describe-instances \
-  --filters "Name=tag:Name,Values=crdb-node*" \
-  --query "Reservations[].Instances[].{Name:Tags[0].Value,PublicIP:PublicIpAddress}" \
-  --output table
+aws ec2 describe-instances --filters "Name=tag:Name,Values=crdb-node*" --query "Reservations[].Instances[].{Name:Tags[0].Value,PublicIP:PublicIpAddress}" --output table
 ```
 
 ---
 
-## Step 31: SSH to Node-1
+### Step 31: SSH to Node-1
 
 ```bash
-ssh -i ~/.ssh/id_rsa ubuntu@<NODE1_PUBLIC_IP>
+ssh -i ~/.ssh/id_rsa ubuntu@3.111.218.94
 ```
 
 Verify
@@ -216,18 +166,18 @@ crdb-node1
 From **Node-1**:
 
 ```bash
-ping 10.10.2.10
+ping -c 5 10.10.2.10
 ```
 
 ```bash
-ping 10.10.3.10
+ping -c 5 10.10.3.10
 ```
 
-Both should respond successfully.
+Both Nodes should respond successfully.
 
 ---
 
-## End of Part 3
+### End of Part 3
 
 You now have:
 
