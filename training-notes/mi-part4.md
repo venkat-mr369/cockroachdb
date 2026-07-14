@@ -114,7 +114,7 @@ id cockroach
 
 ---
 
-## Step 38: Create Directory Structure
+### Step 38: Create Directory Structure
 
 ```bash
 sudo mkdir -p /var/lib/cockroach/data
@@ -136,19 +136,19 @@ sudo ls -ld /var/lib/cockroach
 
 ### Step 39: Configure Hostname
 
-### Node-1
+### On Node-1
 
 ```bash
 sudo hostnamectl set-hostname crdb-node1
 ```
 
-### Node-2
+### On Node-2
 
 ```bash
 sudo hostnamectl set-hostname crdb-node2
 ```
 
-### Node-3
+### On Node-3
 
 ```bash
 sudo hostnamectl set-hostname crdb-node3
@@ -190,7 +190,7 @@ cat /etc/hosts
 
 ---
 
-## Step 41: Create Environment File
+### Step 41: Create Environment File
 
 ### Node-1
 
@@ -311,7 +311,7 @@ ss -lnt | grep 8080
 
 ---
 
-## End of Part 4
+## completed Part 4
 
 At this stage:
 
