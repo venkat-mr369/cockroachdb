@@ -9,7 +9,7 @@
 
 ---
 
-## Step 11: Create Public Subnet-1
+### Step 11: Create Public Subnet-1
 
 ```bash
 aws ec2 create-subnet --vpc-id $VPC_ID --cidr-block 10.10.1.0/24 --availability-zone ap-south-1a
@@ -29,7 +29,7 @@ aws ec2 create-tags --resources $SUBNET1 --tags Key=Name,Value=subnet-a
 
 ---
 
-## Step 12: Create Public Subnet-2
+### Step 12: Create Public Subnet-2
 
 ```bash
 aws ec2 create-subnet --vpc-id $VPC_ID --cidr-block 10.10.2.0/24 --availability-zone ap-south-1b
@@ -49,7 +49,7 @@ aws ec2 create-tags --resources $SUBNET2 --tags Key=Name,Value=subnet-b
 
 ---
 
-## Step 13: Create Public Subnet-3
+### Step 13: Create Public Subnet-3
 
 ```bash
 aws ec2 create-subnet --vpc-id $VPC_ID --cidr-block 10.10.3.0/24 --availability-zone ap-south-1c
@@ -69,7 +69,7 @@ aws ec2 create-tags --resources $SUBNET3 --tags Key=Name,Value=subnet-c
 
 ---
 
-## Step 14: Enable Auto Public IP Assignment
+### Step 14: Enable Auto Public IP Assignment
 
 Subnet-1
 
@@ -91,7 +91,7 @@ aws ec2 modify-subnet-attribute --subnet-id $SUBNET3 --map-public-ip-on-launch
 
 ---
 
-## Step 15: Associate Route Table
+### Step 15: Associate Route Table
 
 Subnet-1
 
@@ -113,7 +113,7 @@ aws ec2 associate-route-table --subnet-id $SUBNET3 --route-table-id $RT_ID
 
 ---
 
-## Step 16: Create Security Group
+### Step 16: Create Security Group
 
 ```bash
 aws ec2 create-security-group --group-name sg_cockroach --description "CockroachDB Security Group" --vpc-id $VPC_ID
@@ -133,7 +133,7 @@ aws ec2 create-tags --resources $SG_ID --tags Key=Name,Value=sg_cockroach
 
 ---
 
-## Step 17: Allow SSH
+### Step 17: Allow SSH
 
 Replace `60.243.239.68/32` with your public IP (for Laptap Ipaddress example, `203.0.113.25/32`).
 
@@ -143,7 +143,7 @@ aws ec2 authorize-security-group-ingress --group-id $SG_ID --protocol tcp --port
 
 ---
 
-## Step 18: Allow CockroachDB SQL Port
+### Step 18: Allow CockroachDB SQL Port
 
 ```bash
 aws ec2 authorize-security-group-ingress --group-id $SG_ID --protocol tcp --port 26257 --cidr 10.10.0.0/16
@@ -151,7 +151,7 @@ aws ec2 authorize-security-group-ingress --group-id $SG_ID --protocol tcp --port
 
 ---
 
-## Step 19: Allow CockroachDB Admin UI
+### Step 19: Allow CockroachDB Admin UI
 
 For a lab:
 
