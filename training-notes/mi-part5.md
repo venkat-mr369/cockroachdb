@@ -1,4 +1,4 @@
-### AWS CLI Lab – Part 4
+### AWS CLI Lab – Part 5
 
 ### Install and Configure CockroachDB on All Three Nodes (Manual)
 
@@ -321,4 +321,146 @@ At this stage:
 
 The cluster has **not** been initialized yet.
 
-In this  **Part 5**, you will initialize the cluster with `cockroach init`, verify all three nodes, connect with the SQL shell, create a sample database and table, and validate the cluster through the CockroachDB Admin UI.
+### On Node 1
+aws ec2 describe-instances --filters "Name=tag:Name,Values=crdb-node*" --query "Reservations[].Instances[].{Name:Tags[0].Value,PublicIP:PublicIpAddress,PrivateIP:PrivateIpAddress}" --output table
+
+```output
+------------------------------------------------
+|               DescribeInstances              |
++------------+--------------+------------------+
+|    Name    |  PrivateIP   |    PublicIP      |
++------------+--------------+------------------+
+|  crdb-node3|  10.10.3.10  |  3.110.226.138   |
+|  crdb-node2|  10.10.2.10  |  13.201.227.212  |
+|  crdb-node1|  10.10.1.10  |  3.111.218.94    |
++------------+--------------+------------------+
+```
+### Init Cluster
+You're right. I skipped one important operational step. Students need to know **how to connect to the node before running `cockroach init`**.
+
+I'd revise **Part 5** like this.
+
+---
+
+# Part 5 – Initialize and Verify CockroachDB Cluster
+
+## Step 45: Get Public IP Addresses
+
+```bash
+aws ec2 describe-instances \
+  --filters "Name=tag:Name,Values=crdb-node*" \
+  --query "Reservations[].Instances[].{Name:Tags[0].Value,PublicIP:PublicIpAddress,PrivateIP:PrivateIpAddress}" \
+  --output table
+```
+
+Example
+
+```text
+----------------------------------------------------------
+| Name        | PublicIP       | PrivateIP     |
+----------------------------------------------------------
+| crdb-node1  | 13.233.xx.xx   | 10.10.1.10    |
+| crdb-node2  | 3.110.xx.xx    | 10.10.2.10    |
+| crdb-node3  | 15.206.xx.xx   | 10.10.3.10    |
+----------------------------------------------------------
+```
+
+---
+### Step 49: Initialize the Cluster (Run Only Once)
+
+> **Run this command only on Node-1.**
+
+```bash
+cockroach init --insecure --host=10.10.1.10:26257
+```
+
+Expected
+
+```text
+Cluster successfully initialized
+```
+
+> **Important:** Never run `cockroach init` again. The cluster only needs to be initialized once.
+
+---
+
+## Step 50: Verify Cluster Nodes
+
+```bash
+cockroach node status --insecure --host=10.10.1.10:26257
+```
+
+Expected
+
+```text
+3 rows
+
+Node1
+Node2
+Node3
+```
+
+All nodes should show:
+
+```text
+is_live       = true
+is_available  = true
+```
+
+---
+
+## Step 51: Connect to SQL Shell
+
+```bash
+cockroach sql --insecure --host=10.10.1.10:26257
+```
+
+Prompt
+
+```text
+root@10.10.1.10:26257/defaultdb>
+```
+
+---
+
+After this, continue with:
+
+* Create Database
+* Create Table
+* Insert Data
+* Query Data
+* Admin UI
+* Failover Demo
+
+---
+
+**workflow diagram** 
+
+```text
+VM1  ✓ Running
+VM2  ✓ Running
+VM3  ✓ Running
+        │
+        ▼
+SSH to Node-1
+        │
+        ▼
+Verify CockroachDB Service
+        │
+        ▼
+cockroach init (Only Once)
+        │
+        ▼
+Verify 3 Nodes
+        │
+        ▼
+Connect SQL Shell
+        │
+        ▼
+Create Database
+        │
+        ▼
+Open Admin UI
+```
+
+
