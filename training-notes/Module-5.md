@@ -60,7 +60,7 @@ This matters because some `crdb_internal` tables, DB Console pages, and administ
 
 ---
 
-# PART 1 — STORAGE ENGINE
+### PART 1 — STORAGE ENGINE
 
 ### 1. Storage Engine Architecture
 
@@ -314,16 +314,12 @@ UPDATE employees SET salary = salary + 1 WHERE emp_id BETWEEN 1 AND 10000;
 Run several times:
 
 ```sql
-UPDATE employees
-SET salary = salary + 1
-WHERE emp_id BETWEEN 10001 AND 20000;
+UPDATE employees SET salary = salary + 1 WHERE emp_id BETWEEN 10001 AND 20000;
 
-UPDATE employees
-SET salary = salary + 1
-WHERE emp_id BETWEEN 20001 AND 30000;
+UPDATE employees SET salary = salary + 1 WHERE emp_id BETWEEN 20001 AND 30000;
 ```
 
-Conceptually, Pebble initially accumulates writes in memory structures while maintaining durability through its WAL.
+Pebble initially accumulates writes in memory structures while maintaining durability through its WAL.
 
 ```text
 SQL UPDATE
@@ -892,7 +888,7 @@ Historical reads also cannot read arbitrarily old data after required MVCC versi
 
 ---
 
-# PART 12 — CLOSED TIMESTAMPS
+### PART 12 — CLOSED TIMESTAMPS
 
 ### 12. Closed Timestamp Concept
 
