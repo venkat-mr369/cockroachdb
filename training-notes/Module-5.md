@@ -245,29 +245,46 @@ SELECT name FROM crdb_internal.node_metrics WHERE lower(name) LIKE '%pebble%' OR
 
 An LSM Tree (Log-Structured Merge-Tree) is a write-optimized data structure where writes are first accumulated in memory (MemTable) and later flushed to immutable disk files (SSTables). Background compaction organizes and merges SSTables across levels to improve storage efficiency and read performance.
 
+1. SQL Layer understands and executes the SQL statement.
+
+2. KV Layer converts the operation into distributed key-value operations and determines the relevant Range.
+
+3. Leaseholder coordinates the request for that range.
+
+4. Raft replicates the write across the range's replicas and requires quorum for consensus/progress.
+
+5. Pebble is the local storage engine used by each replica's store.
+
+6. WAL provides storage-engine durability for pending Pebble writes.
+
+7. MemTable holds recently written data in memory.
+
+8. Flush moves immutable MemTable contents to disk.
+
+9. SSTables are immutable sorted files stored on disk.
+
+10. LSM Tree organizes SSTables into levels such as L0, L1, L2...
+
+11. Compaction merges and reorganizes SSTables between levels.
+
+
 For LSM-related metrics:
 
 ```sql
-SELECT name
-FROM crdb_internal.node_metrics
-WHERE lower(name) LIKE '%lsm%'
-ORDER BY name;
+SELECT name FROM crdb_internal.node_metrics WHERE lower(name) LIKE '%lsm%' ORDER BY name;
 ```
 
 For storage-related metrics:
 
-```sql
-SELECT name
-FROM crdb_internal.node_metrics
-WHERE lower(name) LIKE '%storage%'
-ORDER BY name;
+```sql 
+SELECT name FROM crdb_internal.node_metrics WHERE lower(name) LIKE '%storage%' ORDER BY name;
 ```
 
 This is safer than assuming a particular metric exists in every CockroachDB release.
 
 ---
 
-# PART 3 — MEMTABLES
+### PART 3 — MEMTABLES
 
 ### 3. Generate Write Activity
 
@@ -291,9 +308,7 @@ salary
 generate updates:
 
 ```sql
-UPDATE employees
-SET salary = salary + 1
-WHERE emp_id BETWEEN 1 AND 10000;
+UPDATE employees SET salary = salary + 1 WHERE emp_id BETWEEN 1 AND 10000;
 ```
 
 Run several times:
@@ -335,19 +350,25 @@ Important: **MemTables are internal Pebble structures**. You don't query them us
 Use metrics to observe their behavior:
 
 ```sql
-SELECT name, value
+SELECT name, value FROM crdb_internal.node_metrics WHERE lower(name) LIKE '%memtable%' ORDER BY name;
+```
+**rocksdb.memtable.total-size (~134 MB)** → This can increase or decrease depending on current write activity. When MemTables fill up, Pebble flushes them to SSTables, so memory is reused/released. It does not continuously increase forever.
+
+**pebble-memtable-flush.bytes-written (~875 MB)** → This is a cumulative counter, so it generally keeps increasing as more MemTables are flushed. It typically resets when the relevant node/process metric lifecycle resets, such as after a restart.
+
+SELECT
+    name,
+    value AS bytes,
+    round((value / 1024 / 1024)::DECIMAL, 2) AS mb
 FROM crdb_internal.node_metrics
 WHERE lower(name) LIKE '%memtable%'
 ORDER BY name;
-```
 
 Run this before and after generating heavy writes.
 
 ---
 
-# PART 4 — WAL
-
-### 4. WAL Demo
+### PART 4 — WAL
 
 At the Pebble storage-engine level, the WAL protects writes that have not yet been fully persisted into SSTables.
 
@@ -356,9 +377,7 @@ Generate a transaction:
 ```sql
 BEGIN;
 
-UPDATE employees
-SET salary = salary + 500
-WHERE emp_id = 101;
+UPDATE employees SET salary = salary + 500 WHERE emp_id = 101;
 
 COMMIT;
 ```
@@ -393,15 +412,51 @@ Be careful when teaching this: **CockroachDB replication uses Raft**, while **Pe
 Search metrics:
 
 ```sql
-SELECT name, value
-FROM crdb_internal.node_metrics
-WHERE lower(name) LIKE '%wal%'
-ORDER BY name;
+SELECT name, value FROM crdb_internal.node_metrics WHERE lower(name) LIKE '%wal%' ORDER BY name;
 ```
 
+```
+SELECT
+    name,
+    value AS bytes,
+    round((value / 1024 / 1024)::DECIMAL, 2) AS mb
+FROM crdb_internal.node_metrics
+WHERE lower(name) LIKE '%wal%'
+  AND (
+       lower(name) LIKE '%bytes-written%'
+       OR lower(name) LIKE '%bytes_written%'
+       OR lower(name) LIKE '%bytes_in%'
+      )
+ORDER BY name;
+```
+```
+                 SQL WRITE
+                     │
+                     ▼
+                  KV Layer
+                     │
+                     ▼
+               Range Leaseholder
+                     │
+                     ▼
+              RAFT REPLICATION
+           "Replicate the change"
+                     │
+           ┌─────────┼─────────┐
+           ▼         ▼         ▼
+         Node 1    Node 2    Node 3
+           │         │         │
+           ▼         ▼         ▼
+         Pebble    Pebble    Pebble
+           │         │         │
+           ▼         ▼         ▼
+          WAL       WAL       WAL
+           +         +         +
+       MemTable  MemTable  MemTable
+```
 ---
 
-# PART 5 — SSTABLES
+### PART 5 — SSTABLES
 
 ### 5. SSTable Demo
 
@@ -431,8 +486,7 @@ Generate substantial writes using your existing large tables.
 For example:
 
 ```sql
-UPDATE employees
-SET salary = salary + 1;
+UPDATE employees SET salary = salary + 1;
 ```
 
 Then search for SSTable metrics:
@@ -443,14 +497,13 @@ FROM crdb_internal.node_metrics
 WHERE lower(name) LIKE '%sstable%'
 ORDER BY name;
 ```
-
+```
+SELECT name,value AS sstable_count FROM crdb_internal.node_metrics WHERE name = 'rocksdb.num-sstables';
+```
 You can also inspect Pebble metrics:
 
 ```sql
-SELECT name, value
-FROM crdb_internal.node_metrics
-WHERE lower(name) LIKE '%pebble%'
-ORDER BY name;
+SELECT name, value FROM crdb_internal.node_metrics WHERE lower(name) LIKE '%pebble%' ORDER BY name;
 ```
 
 For a physical demonstration, identify the store directory from:
@@ -469,7 +522,7 @@ Do not delete, rename, or edit Pebble files.
 
 ---
 
-# PART 6 — LSM TREE
+### PART 6 — LSM TREE
 
 ### 6. LSM Tree Architecture
 
@@ -505,25 +558,19 @@ Pebble uses an LSM-tree design.
 Generate sustained updates:
 
 ```sql
-UPDATE employees
-SET salary = salary + 1
-WHERE emp_id % 2 = 0;
+UPDATE employees SET salary = salary + 1 WHERE emp_id % 2 = 0;
 ```
 
 Then:
 
 ```sql
-UPDATE employees
-SET salary = salary + 1
-WHERE emp_id % 3 = 0;
+UPDATE employees SET salary = salary + 1 WHERE emp_id % 3 = 0;
 ```
 
 Then:
 
 ```sql
-UPDATE employees
-SET salary = salary + 1
-WHERE emp_id % 5 = 0;
+UPDATE employees SET salary = salary + 1 WHERE emp_id % 5 = 0;
 ```
 
 This creates write activity and new MVCC versions, which eventually contribute to flush and compaction activity.
@@ -539,7 +586,7 @@ ORDER BY name;
 
 ---
 
-# PART 7 — WRITE PATH
+### PART 7 — WRITE PATH
 
 ### 7. CockroachDB Distributed Write Path
 
