@@ -164,11 +164,86 @@ server.time_until_store_dead = 5 minutes tells CockroachDB how long an unavailab
 To discover available Pebble-related metrics in your version:
 
 ```sql
-SELECT name 
-FROM crdb_internal.node_metrics
-WHERE lower(name) LIKE '%pebble%'
-ORDER BY name;
+SELECT name FROM crdb_internal.node_metrics WHERE lower(name) LIKE '%pebble%' ORDER BY name;
 ```
+### Pebble Storage Engine Metrics – Description
+
+Command:
+
+```sql
+SELECT name FROM crdb_internal.node_metrics WHERE lower(name) LIKE '%pebble%' ORDER BY name;
+```
+
+**Purpose:** Displays available **Pebble storage engine-related metrics** on the CockroachDB node. Pebble is CockroachDB's underlying **LSM-based key-value storage engine**.
+
+| Metric                                | Meaning                                                                                |
+| ------------------------------------- | -------------------------------------------------------------------------------------- |
+| `pebble-compaction.bytes-written`     | Bytes written during **LSM compaction**, where SSTables are reorganized/merged.        |
+| `pebble-manifest.bytes-written`       | Bytes written to the Pebble **MANIFEST**, which tracks SSTable and LSM metadata/state. |
+| `pebble-memtable-flush.bytes-written` | Bytes written when an in-memory **MemTable is flushed to SSTables on disk**.           |
+| `pebble-wal.bytes-written`            | Bytes written to Pebble's **Write-Ahead Log (WAL)** for storage-engine durability.     |
+| `pebble-compaction.block-load.*`      | Block I/O activity and latency generated during **compaction**.                        |
+| `pebble-get.block-load.*`             | Block I/O activity, cached bytes, and latency during **point reads/gets**.             |
+| `pebble-ingest.block-load.*`          | Block I/O activity and latency related to **SSTable ingestion**.                       |
+
+### Simple Flow
+
+```text
+                    SQL WRITE
+                        │
+                        ▼
+                   SQL LAYER
+                        │
+                        ▼
+                    KV LAYER
+                        │
+                        ▼
+              Find Target RANGE
+                        │
+                        ▼
+                  LEASEHOLDER
+                        │
+                        ▼
+                RAFT REPLICATION
+               /        │        \
+              ▼         ▼         ▼
+          Replica 1  Replica 2  Replica 3
+               \        │        /
+                └── RAFT QUORUM ─┘
+                        │
+                        ▼
+              PEBBLE STORAGE ENGINE
+                        │
+              ┌─────────┴─────────┐
+              ▼                   ▼
+             WAL               MemTable
+       (Durability Log)        (In Memory)
+                                  │
+                                  │ MemTable Full
+                                  ▼
+                                FLUSH
+                                  │
+                                  ▼
+                               SSTABLE
+                               (On Disk)
+                                  │
+                                  ▼
+                           LSM TREE LEVELS
+                                  │
+                       ┌──────────┼──────────┐
+                       ▼          ▼          ▼
+                      L0         L1         L2 ...
+                       │          │          │
+                       └──────────┼──────────┘
+                                  │
+                                  ▼
+                             COMPACTION
+                                  │
+                                  ▼
+                     Merge / Reorganize SSTables
+```
+
+An LSM Tree (Log-Structured Merge-Tree) is a write-optimized data structure where writes are first accumulated in memory (MemTable) and later flushed to immutable disk files (SSTables). Background compaction organizes and merges SSTables across levels to improve storage efficiency and read performance.
 
 For LSM-related metrics:
 
