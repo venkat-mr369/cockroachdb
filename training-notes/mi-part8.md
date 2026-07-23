@@ -1,21 +1,24 @@
+## AWS CLI Lab – adding Node 4 & Installation of CockroachDB
 
-## Part 4 – Install CockroachDB and Join `crdb-node4`
+## Add CockroachDB Node-4 (Manual)
 
-### Prerequisites
-
-* `crdb-node4` is running.
-* Private IP: **10.10.4.10**
-* Hostname: **crdb-node4**
-* SSH access is working.
-* Existing cluster:
-
-  * Node1 → 10.10.1.10
-  * Node2 → 10.10.2.10
-  * Node3 → 10.10.3.10
+> **Prerequisites**
+>
+> Completed Parts 1–4.
+>
+> Existing Cluster:
+>
+> * crdb-node1 → 10.10.1.10
+> * crdb-node2 → 10.10.2.10
+> * crdb-node3 → 10.10.3.10
+>
+> New Node:
+>
+> * crdb-node4 → 10.10.4.10
 
 ---
 
-# Step 1: SSH to Node4
+## Step 45: SSH to Node-4
 
 ```bash
 ssh -i ~/.ssh/id_rsa ubuntu@<NODE4_PUBLIC_IP>
@@ -23,19 +26,122 @@ ssh -i ~/.ssh/id_rsa ubuntu@<NODE4_PUBLIC_IP>
 
 ---
 
-# Step 2: Set Hostname
+## Step 46: Update Ubuntu
+
+```bash
+sudo apt update
+
+sudo apt upgrade -y
+```
+
+---
+
+## Step 47: Install Required Packages
+
+```bash
+sudo apt install -y \
+curl \
+wget \
+tar \
+jq \
+vim \
+unzip \
+net-tools \
+dnsutils \
+ca-certificates
+```
+
+Verify
+
+```bash
+curl --version
+
+wget --version
+```
+
+---
+
+## Step 48: Download CockroachDB
+
+Use the **same version** as the existing cluster.
+
+```bash
+cd /tmp
+
+wget https://binaries.cockroachdb.com/cockroach-v25.2.2.linux-amd64.tgz
+```
+
+Extract
+
+```bash
+tar -xzf cockroach-v25.2.2.linux-amd64.tgz
+```
+
+Copy Binary
+
+```bash
+sudo cp cockroach-v25.2.2.linux-amd64/cockroach /usr/local/bin/
+```
+
+Verify
+
+```bash
+cockroach version
+```
+
+---
+
+## Step 49: Create CockroachDB User
+
+```bash
+sudo useradd --system \
+--home /var/lib/cockroach \
+--shell /bin/bash cockroach
+```
+
+Verify
+
+```bash
+id cockroach
+```
+
+---
+
+## Step 50: Create Directory Structure
+
+```bash
+sudo mkdir -p /var/lib/cockroach/data
+
+sudo mkdir -p /var/lib/cockroach/logs
+
+sudo chown -R cockroach:cockroach /var/lib/cockroach
+
+sudo chmod 750 /var/lib/cockroach
+```
+
+Verify
+
+```bash
+sudo ls -ld /var/lib/cockroach
+```
+
+---
+
+## Step 51: Configure Hostname
 
 ```bash
 sudo hostnamectl set-hostname crdb-node4
 ```
 
-Verify:
+Verify
 
 ```bash
 hostname
+
+cat /etc/hostname
 ```
 
-Expected:
+Expected
 
 ```text
 crdb-node4
@@ -43,18 +149,32 @@ crdb-node4
 
 ---
 
-# Step 3: Update `/etc/hosts`
+## Step 52: Update `/etc/hosts`
 
-On **all four nodes**, ensure the following entries exist:
+Update **all four nodes**.
 
-```text
-10.10.1.10    crdb-node1
-10.10.2.10    crdb-node2
-10.10.3.10    crdb-node3
-10.10.4.10    crdb-node4
+```bash
+sudo vi /etc/hosts
 ```
 
-Test:
+Contents
+
+```text
+127.0.0.1 localhost
+
+10.10.1.10 crdb-node1
+10.10.2.10 crdb-node2
+10.10.3.10 crdb-node3
+10.10.4.10 crdb-node4
+```
+
+Verify
+
+```bash
+cat /etc/hosts
+```
+
+Test
 
 ```bash
 ping -c 4 crdb-node1
@@ -64,212 +184,116 @@ ping -c 4 crdb-node3
 
 ---
 
-# Step 4: Download the Same CockroachDB Version
-
-Check the version on Node1:
+## Step 53: Create Environment File
 
 ```bash
-cockroach version
+sudo vi /etc/default/cockroach
 ```
 
-Example:
+Contents
 
 ```text
-CockroachDB CCL v25.3.3
+NODE_IP=10.10.4.10
+DATA_DIR=/var/lib/cockroach/data
+LOG_DIR=/var/lib/cockroach/logs
+JOIN_NODES=10.10.1.10:26257,10.10.2.10:26257,10.10.3.10:26257
 ```
 
-Download that exact version on Node4:
-
-```bash
-curl https://binaries.cockroachdb.com/cockroach-v25.3.3.linux-amd64.tgz | tar -xz
-```
-
-Install it:
-
-```bash
-sudo cp cockroach-v25.3.3.linux-amd64/cockroach /usr/local/bin/
-sudo chmod +x /usr/local/bin/cockroach
-```
-
-Verify:
-
-```bash
-cockroach version
-```
+> **Note:** The `JOIN_NODES` list contains the existing cluster nodes. The new node contacts these nodes to join the cluster.
 
 ---
 
-# Step 5: Create the CockroachDB User
-
-If it doesn't already exist:
-
-```bash
-sudo useradd -m -s /bin/bash cockroach
-```
-
-Verify:
-
-```bash
-id cockroach
-```
-
----
-
-# Step 6: Create Directories
-
-```bash
-sudo mkdir -p /var/lib/cockroach
-sudo mkdir -p /var/log/cockroach
-```
-
-Set ownership:
-
-```bash
-sudo chown -R cockroach:cockroach /var/lib/cockroach
-sudo chown -R cockroach:cockroach /var/log/cockroach
-```
-
-Permissions:
-
-```bash
-sudo chmod 755 /var/lib/cockroach
-sudo chmod 755 /var/log/cockroach
-```
-
-Verify:
-
-```bash
-ls -ld /var/lib/cockroach
-ls -ld /var/log/cockroach
-```
-
-Expected:
-
-```text
-drwxr-xr-x ... cockroach cockroach /var/lib/cockroach
-drwxr-xr-x ... cockroach cockroach /var/log/cockroach
-```
-
----
-
-# Step 7: Create the Systemd Service
-
-Create:
+## Step 54: Create systemd Service
 
 ```bash
 sudo vi /etc/systemd/system/cockroach.service
 ```
 
-Paste:
+Paste
 
 ```ini
 [Unit]
-Description=CockroachDB
-After=network.target
+Description=CockroachDB Database
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=notify
+
 User=cockroach
+Group=cockroach
+
+EnvironmentFile=/etc/default/cockroach
+
 ExecStart=/usr/local/bin/cockroach start \
-  --insecure \
-  --store=/var/lib/cockroach \
-  --listen-addr=10.10.4.10:26257 \
-  --advertise-addr=10.10.4.10:26257 \
-  --http-addr=10.10.4.10:8080 \
-  --join=10.10.1.10:26257,10.10.2.10:26257,10.10.3.10:26257 \
-  --log="file-defaults: {dir: '/var/log/cockroach'}"
+ --insecure \
+ --store=${DATA_DIR} \
+ --listen-addr=0.0.0.0:26257 \
+ --advertise-addr=${NODE_IP}:26257 \
+ --http-addr=0.0.0.0:8080 \
+ --join=${JOIN_NODES} \
+ --log-dir=${LOG_DIR}
 
 Restart=always
 RestartSec=5
-LimitNOFILE=65536
+
+LimitNOFILE=1048576
 
 [Install]
 WantedBy=multi-user.target
 ```
 
-> If your existing nodes use a different logging configuration, copy the service file from Node1 and update only the IP address and `--join` list.
+> This is identical to the service used on Nodes 1–3. The only difference is the values in `/etc/default/cockroach`.
 
 ---
 
-# Step 8: Reload systemd
+## Step 55: Enable and Start Service
 
 ```bash
 sudo systemctl daemon-reload
-```
 
-Enable the service:
-
-```bash
 sudo systemctl enable cockroach
+
+sudo systemctl start cockroach
 ```
 
 ---
 
-# Step 9: Start CockroachDB
+## Step 56: Verify Service
 
 ```bash
-sudo systemctl start cockroach
+sudo systemctl status cockroach --no-pager
 ```
 
-Check status:
-
-```bash
-sudo systemctl status cockroach
-```
-
-Expected:
+Expected
 
 ```text
 Active: active (running)
 ```
 
----
-
-# Step 10: Monitor Logs
-
-Follow the logs:
+Verify Binary
 
 ```bash
-sudo journalctl -u cockroach -f
+cockroach version
 ```
 
-You should see messages indicating that the node has joined the existing cluster.
-
-If you're using file logging, also check:
+Verify SQL Port
 
 ```bash
-ls -lh /var/log/cockroach
+ss -lnt | grep 26257
 ```
 
-Example:
+Verify Admin UI Port
 
-```text
-cockroach.log
-cockroach-health.log
-cockroach-sql.log
+```bash
+ss -lnt | grep 8080
 ```
 
 ---
 
-# Step 11: Verify from SQL
+## Step 57: Verify Node Joined the Cluster
 
-Connect to the cluster:
-
-```bash
-cockroach sql --insecure --host=10.10.1.10:26257
-```
-
-List nodes:
-
-```sql
-SELECT node_id,
-       address,
-       locality,
-       is_live
-FROM crdb_internal.gossip_nodes;
-```
-
-Or use the CLI:
+From **Node-1**:
 
 ```bash
 cockroach node status \
@@ -277,125 +301,80 @@ cockroach node status \
   --insecure
 ```
 
-You should now see **4 live nodes**.
-
----
-
-# Step 12: Verify in Admin UI
-
-Open:
+Expected
 
 ```text
-http://10.10.1.10:8080
-```
-
-Go to:
-
-**Overview → Nodes**
-
-Expected:
-
-```text
-Node1  Live
-Node2  Live
-Node3  Live
-Node4  Live
+Node ID   Address           Build    Updated At
+----------------------------------------------------------
+1         10.10.1.10:26257
+2         10.10.2.10:26257
+3         10.10.3.10:26257
+4         10.10.4.10:26257
 ```
 
 ---
 
-# Step 13: Observe Replica Rebalancing
+## Step 58: Verify in Admin UI
+
+Open
+
+```
+http://<Node1_Public_IP>:8080
+```
 
 Navigate to:
 
-**Overview → Replication**
-
-Watch:
-
-* Replica count
-* Leaseholder count
-* Rebalancing activity
-
-Initially, Node4 may have **0 replicas**.
-
-After a few minutes, CockroachDB's allocator should begin moving replicas to Node4 automatically.
-
----
-
-# Step 14: Verify Replica Distribution
-
-Run:
-
-```sql
-SHOW RANGES FROM TABLE customers;
+```
+Overview
+    ↓
+Nodes
 ```
 
-Also check:
-
-```sql
-SHOW RANGES FROM TABLE orders;
-```
-
-Over time, you'll see replicas assigned to Node4 as rebalancing progresses.
-
----
-
-# Step 15: Verify Cluster Health
-
-```bash
-cockroach node status \
-  --host=10.10.1.10:26257 \
-  --insecure
-```
-
-Review:
-
-* Node status
-* Replica counts
-* Capacity
-* Live status
-
----
-
-## Directory Layout
+Verify
 
 ```text
-/
-├── usr
-│   └── local
-│       └── bin
-│           └── cockroach
-│
-├── var
-│   ├── lib
-│   │   └── cockroach
-│   │       ├── AUXILIARY
-│   │       ├── MANIFEST-*
-│   │       ├── CURRENT
-│   │       ├── OPTIONS-*
-│   │       └── *.sst
-│   │
-│   └── log
-│       └── cockroach
-│           ├── cockroach.log
-│           ├── cockroach-health.log
-│           └── cockroach-sql.log
-│
-└── etc
-    └── systemd
-        └── system
-            └── cockroach.service
+✓ Node1 - Live
+✓ Node2 - Live
+✓ Node3 - Live
+✓ Node4 - Live
 ```
 
 ---
 
-## Expected Result
+## Step 59: Observe Automatic Replica Rebalancing
 
-After completing these steps:
+Open
 
-* ✅ `crdb-node4` is running CockroachDB.
-* ✅ It has joined the existing 3-node cluster.
-* ✅ Admin UI shows **4 live nodes**.
-* ✅ Replicas begin moving to Node4 automatically.
-* ✅ Leaseholders are gradually redistributed.
-* ✅ The cluster expands from **3 nodes to 4 nodes** with no application downtime.
+```
+Overview
+    ↓
+Replication
+```
+
+Observe:
+
+* Replica Count
+* Leaseholder Count
+* Rebalancing Activity
+
+Initially, Node4 may have zero replicas. Over the next few minutes, CockroachDB's allocator will automatically move replicas to Node4 to balance the cluster.
+
+---
+
+## Completed Part 4A
+
+At this stage:
+
+* ✅ CockroachDB installed on **Node4**
+* ✅ `cockroach` system user created
+* ✅ Data directory (`/var/lib/cockroach/data`) created
+* ✅ Log directory (`/var/lib/cockroach/logs`) created
+* ✅ Hostname configured as `crdb-node4`
+* ✅ `/etc/hosts` updated on all four nodes
+* ✅ `/etc/default/cockroach` created for Node4
+* ✅ `cockroach.service` configured using the same template as Nodes 1–3
+* ✅ Node4 joined the existing cluster
+* ✅ Admin UI shows **4 live nodes**
+* ✅ Automatic replica rebalancing begins
+
+This version matches the structure and conventions used throughout your existing lab manual, so students will see a consistent workflow when expanding the cluster.
