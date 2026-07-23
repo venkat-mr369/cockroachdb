@@ -19,6 +19,58 @@ You already have:
 * ✅ Node2
 * ✅ Node3
 
+You can retrieve them from AWS CLI:
+
+**VPC**
+
+```bash
+aws ec2 describe-vpcs \
+  --query "Vpcs[].{VpcId:VpcId,Cidr:CidrBlock}" \
+  --output table
+```
+
+**Route Tables**
+
+```bash
+aws ec2 describe-route-tables \
+  --query "RouteTables[].{RouteTableId:RouteTableId,VpcId:VpcId}" \
+  --output table
+```
+
+**Security Groups**
+
+```bash
+aws ec2 describe-security-groups \
+  --query "SecurityGroups[].{Name:GroupName,GroupId:GroupId}" \
+  --output table
+```
+
+**Latest Ubuntu 24.04 AMI (ap-south-1)**
+
+```bash
+aws ec2 describe-images \
+  --owners 099720109477 \
+  --filters \
+    "Name=name,Values=ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*" \
+    "Name=architecture,Values=x86_64" \
+    "Name=virtualization-type,Values=hvm" \
+  --query "Images | sort_by(@,&CreationDate)[-1].ImageId" \
+  --output text \
+  --region ap-south-1
+```
+
+Then export the values again.
+
+**Tip:** If you're writing a lab manual, create a small section called **"Load Environment Variables"** at the beginning of every AWS CLI lab so students can simply run:
+
+```bash
+export VPC_ID=vpc-xxxxxxxx
+export RT_ID=rtb-xxxxxxxx
+export SG_ID=sg-xxxxxxxx
+export AMI_ID=ami-xxxxxxxx
+```
+
+---
 Available variables:
 
 ```bash
@@ -26,13 +78,6 @@ echo $VPC_ID
 echo $RT_ID
 echo $SG_ID
 echo $AMI_ID
-```
-
-```
-export VPC_ID=vpc-xxxxxxxxxxxxxxxxx
-export RT_ID=rtb-xxxxxxxxxxxxxxxxx
-export SG_ID=sg-xxxxxxxxxxxxxxxxx
-export AMI_ID=ami-xxxxxxxxxxxxxxxxx
 ```
 
 ---
@@ -264,4 +309,5 @@ At this stage, your AWS infrastructure will include:
   * `crdb-node3` → `10.10.3.10`
   * `crdb-node4` → `10.10.4.10`
 
-The next step is to **install CockroachDB on `crdb-node4`, join it to the existing cluster, and verify automatic replica rebalancing**. That will complete the cluster expansion from 3 nodes to 4 nodes.
+The next step is to **install CockroachDB on `crdb-node4`, join it to the existing cluster, and verify automatic replica rebalancing**. 
+That will complete the cluster configuration from 3 nodes to 4 nodes.
