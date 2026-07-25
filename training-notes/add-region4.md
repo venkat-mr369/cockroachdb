@@ -72,8 +72,8 @@ Expected output:
 -------------------------------------------------------
 | DescribeInstances                                   |
 +------------+-------------+------------+
-| crdb-node5 | 10.20.1.10  | running    |
-| crdb-node6 | 10.20.2.10  | running    |
+| crdb-node5 | 10.30.1.10  | running    |
+| crdb-node6 | 10.30.2.10  | running    |
 +------------+-------------+------------+
 ```
 
@@ -90,9 +90,9 @@ aws ec2 describe-instances \
 
 ---
 
-### Lab Status
+### Lab Current Status
 
-At this point you have:
+At this point we have:
 
 * ✅ Region-B VPC created
 * ✅ Subnets created
