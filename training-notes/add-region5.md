@@ -1,6 +1,5 @@
-### The two VPCs (Region-A and Region-B) must be able to communicate.
+#### The two VPCs (Region-A and Region-B) must be able to communicate.
 
-Assume:
 
 **Region-A (Existing Cluster)**
 
@@ -11,7 +10,7 @@ Assume:
 **Region-B (New Region)**
 
 * Region: `ap-southeast-1` (Singapore)
-* VPC CIDR: `10.20.0.0/16`
+* VPC CIDR: `10.30.0.0/16`
 * VPC ID: `<VPC2-ID>`
 
 ---
@@ -28,7 +27,7 @@ aws ec2 create-vpc-peering-connection \
   --peer-region ap-southeast-1
 ```
 
-Example output:
+Expected output:
 
 ```text
 VpcPeeringConnectionId: pcx-0123456789abcdef0
@@ -55,8 +54,7 @@ aws ec2 accept-vpc-peering-connection \
 Find your Route Table ID:
 
 ```bash
-aws ec2 describe-route-tables \
-  --region ap-south-1
+aws ec2 describe-route-tables --region ap-south-1
 ```
 
 Add the route:
@@ -65,7 +63,7 @@ Add the route:
 aws ec2 create-route \
   --region ap-south-1 \
   --route-table-id <RTB1-ID> \
-  --destination-cidr-block 10.20.0.0/16 \
+  --destination-cidr-block 10.30.0.0/16 \
   --vpc-peering-connection-id <PCX-ID>
 ```
 
@@ -117,7 +115,7 @@ ping 10.20.1.10
 ```
 
 ```bash
-ping 10.20.2.10
+ping 10.30.2.10
 ```
 
 From **Node5**:
@@ -137,7 +135,7 @@ nc -zv 10.10.1.10 26257
 ```
 
 ```bash
-nc -zv 10.20.1.10 26257
+nc -zv 10.30.1.10 26257
 ```
 
 ### Expected Result
