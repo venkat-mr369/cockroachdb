@@ -1,4 +1,4 @@
-### Lab 15 – Horizontal Scaling
+### Horizontal Scaling Adding Nodes into another region
 
 ### Step 1: Create a New VPC in Region-B
 
@@ -6,11 +6,9 @@
 
 #### Existing Environment
 
-Assume your current cluster is in:
-
 * Region-A: `ap-south-1 (Mumbai)`
 
-We'll create the new region in:
+We will create the new region in:
 
 * Region-B: `ap-southeast-1 (Singapore)` (you can choose another region if you prefer)
 
@@ -36,7 +34,7 @@ Configure:
 | ------------------- | ------------------ |
 | Resources to create | VPC only           |
 | Name                | `crdb-region2-vpc` |
-| IPv4 CIDR           | `10.20.0.0/16`     |
+| IPv4 CIDR           | `10.30.0.0/16`     |
 | IPv6 CIDR           | None               |
 | Tenancy             | Default            |
 
@@ -50,7 +48,7 @@ You should see:
 
 | Name               | CIDR           |
 | ------------------ | -------------- |
-| `crdb-region2-vpc` | `10.20.0.0/16` |
+| `crdb-region2-vpc` | `10.30.0.0/16` |
 
 ---
 
@@ -67,7 +65,7 @@ VPC: 10.10.0.0/16
 
 Region-B (Singapore)
 --------------------
-VPC: 10.20.0.0/16
+VPC: 10.30.0.0/16
  ├── Node5 (Later)
  └── Node6 (Later)
 ```
@@ -78,12 +76,12 @@ At the end of Step 1, you should have:
 
 * ✅ Switched to the new AWS region
 * ✅ Created a new VPC named `crdb-region2-vpc`
-* ✅ Assigned the CIDR block `10.20.0.0/16`
+* ✅ Assigned the CIDR block `10.30.0.0/16`
 
-In **Step 2**, we'll create the networking inside this VPC:
+In **Step 2**, we will create the networking inside this VPC:
 
 * Public subnets
 * Internet Gateway
 * Route Table
 * Security Group
-* VPC Peering (to connect Region-A and Region-B so the CockroachDB nodes can communicate).
+* VPC Peering (to connect Region-A(mumbai) and Region-B(singapore) so the CockroachDB nodes can communicate).
