@@ -1,4 +1,5 @@
-### Phase 1 - Provision Infrastructure ✅
+For Confirmation
+### Phase 1 - Provisioning Infrastructure ✅
 
 * Create VPC
 * Create Subnets
@@ -20,9 +21,7 @@
 Check all nodes:
 
 ```bash
-cockroach node status \
-  --insecure \
-  --host=10.10.1.10:26257
+cockroach node status --insecure --host=10.10.1.10:26257
 ```
 
 or
