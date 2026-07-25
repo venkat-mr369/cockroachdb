@@ -52,7 +52,7 @@ aws ec2 authorize-security-group-ingress \
   --group-id <SG-ID> \
   --protocol tcp \
   --port 26257 \
-  --cidr 10.20.0.0/16
+  --cidr 10.30.0.0/16
 ```
 
 ---
@@ -72,7 +72,7 @@ aws ec2 authorize-security-group-ingress \
   --group-id <SG-ID> \
   --protocol tcp \
   --port 8080 \
-  --cidr 10.20.0.0/16
+  --cidr 10.30.0.0/16
 ```
 
 ---
@@ -92,7 +92,7 @@ aws ec2 authorize-security-group-ingress \
 aws ec2 authorize-security-group-ingress \
   --group-id <SG-ID> \
   --protocol -1 \
-  --cidr 10.20.0.0/16
+  --cidr 10.30.0.0/16
 ```
 
 ---
@@ -110,13 +110,13 @@ aws ec2 describe-security-groups \
 | -------- | ----- | ------------------------------------- |
 | TCP      | 22    | Your IP (or `0.0.0.0/0` for lab only) |
 | TCP      | 26257 | `10.10.0.0/16`                        |
-| TCP      | 26257 | `10.20.0.0/16`                        |
+| TCP      | 26257 | `10.30.0.0/16`                        |
 | TCP      | 8080  | `10.10.0.0/16`                        |
-| TCP      | 8080  | `10.20.0.0/16`                        |
-| All      | All   | `10.10.0.0/16`                        |
-| All      | All   | `10.20.0.0/16`                        |
+| TCP      | 8080  | `10.30.0.0/16`                        |
+| All      | All   | `10.30.0.0/16`                        |
+| All      | All   | `10.30.0.0/16`                        |
 
-### Next Step
+#### Next Step
 
 **Step 4:** Launch **Node5** and **Node6** EC2 instances using the AWS CLI with:
 
