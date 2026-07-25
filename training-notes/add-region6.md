@@ -1,10 +1,10 @@
-### Step 6: Install CockroachDB and Join Node5 & Node6 (Insecure Mode)
+### Install CockroachDB and Join Node5 & Node6 (Insecure Mode)
 
 Perform these steps on **Node5** and **Node6**.
 
 ---
 
-### 6.1 SSH to Node5
+### SSH to Node5
 
 ```bash
 ssh -i cockroach.pem ubuntu@<Node5-Public-IP>
@@ -12,7 +12,7 @@ ssh -i cockroach.pem ubuntu@<Node5-Public-IP>
 
 ---
 
-### 6.2 Update the Server
+### Update the Server
 
 ```bash
 sudo apt update
@@ -21,7 +21,7 @@ sudo apt upgrade -y
 
 ---
 
-### 6.3 Download CockroachDB
+### Download CockroachDB
 
 Replace the version with the one running on your existing cluster.
 
@@ -117,15 +117,15 @@ WantedBy=multi-user.target
 > **For Node6**, change:
 >
 > ```text
-> --listen-addr=10.20.2.10:26257
-> --advertise-addr=10.20.2.10:26257
+> --listen-addr=10.30.2.10:26257
+> --advertise-addr=10.30.2.10:26257
 > ```
 >
 > Keep the same `--join` list.
 
 ---
 
-### 6.8 Enable the Service
+### Enable the Service
 
 ```bash
 sudo systemctl daemon-reload
@@ -135,7 +135,7 @@ sudo systemctl start cockroach
 
 ---
 
-### 6.9 Verify Service Status
+### Verify Service Status
 
 ```bash
 sudo systemctl status cockroach
@@ -143,7 +143,7 @@ sudo systemctl status cockroach
 
 ---
 
-### 6.10 Verify the Port
+### Verify the Port
 
 ```bash
 ss -tulnp | grep 26257
@@ -151,7 +151,7 @@ ss -tulnp | grep 26257
 
 ---
 
-### 6.11 Verify from the Existing Cluster
+### Verify from the Existing Cluster
 
 On Node1:
 
