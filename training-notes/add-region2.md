@@ -18,7 +18,7 @@ export AWS_DEFAULT_REGION=ap-southeast-1
 
 ```bash
 aws ec2 create-vpc \
-  --cidr-block 10.20.0.0/16 \
+  --cidr-block 10.30.0.0/16 \
   --tag-specifications 'ResourceType=vpc,Tags=[{Key=Name,Value=crdb-region2-vpc}]'
 ```
 
@@ -47,7 +47,7 @@ aws ec2 modify-vpc-attribute \
 ```bash
 aws ec2 create-subnet \
   --vpc-id <VPC-ID> \
-  --cidr-block 10.20.1.0/24 \
+  --cidr-block 10.30.1.0/24 \
   --availability-zone ap-southeast-1a \
   --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=crdb-subnet-node5}]'
 ```
@@ -59,7 +59,7 @@ aws ec2 create-subnet \
 ```bash
 aws ec2 create-subnet \
   --vpc-id <VPC-ID> \
-  --cidr-block 10.20.2.0/24 \
+  --cidr-block 10.30.2.0/24 \
   --availability-zone ap-southeast-1b \
   --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=crdb-subnet-node6}]'
 ```
@@ -80,9 +80,7 @@ Save the **InternetGatewayId**.
 ### 2.6 Attach the Internet Gateway
 
 ```bash
-aws ec2 attach-internet-gateway \
-  --internet-gateway-id <IGW-ID> \
-  --vpc-id <VPC-ID>
+aws ec2 attach-internet-gateway  --internet-gateway-id <IGW-ID> --vpc-id <VPC-ID>
 ```
 
 ---
