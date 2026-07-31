@@ -1,3 +1,57 @@
+### Install Node 5 and Node 6 (crdb-node5 & crdb-node6)
+
+```
+aws ec2 describe-images \
+  --region ap-southeast-1 \
+  --owners 099720109477 \
+  --filters \
+    "Name=name,Values=ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20260714" \
+    "Name=architecture,Values=x86_64" \
+    "Name=root-device-type,Values=ebs" \
+    "Name=virtualization-type,Values=hvm" \
+  --query "Images[0].[ImageId,Name]" \
+  --output table
+```
+Expected
+
+```
+------------------------------------------------------------------------
+|                            DescribeImages                            |
++----------------------------------------------------------------------+
+|  ami-0ed6a65b84536f6ce                                               |
+|  ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20260714  |
++----------------------------------------------------------------------+
+```
+
+Launch Node5
+
+```
+aws ec2 run-instances \
+  --region ap-southeast-1 \
+  --image-id ami-0ed6a65b84536f6ce \
+  --instance-type t3.small \
+  --key-name crdb-key \
+  --subnet-id subnet-0cb5a39590f921294 \
+  --private-ip-address 10.30.1.10 \
+  --security-group-ids sg-0fe5b9174d0eb03cf \
+  --block-device-mappings '[{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":30,"VolumeType":"gp3","DeleteOnTermination":true}}]' \
+  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=crdb-node5}]'
+```
+Launch Node6
+
+```
+aws ec2 run-instances \
+  --region ap-southeast-1 \
+  --image-id <AMI-ID> \
+  --instance-type t3.micro \
+  --key-name crdb-key \
+  --subnet-id <SUBNET-NODE6-ID> \
+  --private-ip-address 10.30.2.10 \
+  --security-group-ids <SG-ID> \
+  --block-device-mappings '[{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":30,"VolumeType":"gp3","DeleteOnTermination":true}}]' \
+  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=crdb-node6}]'
+```
+
 ### SSH to the Servers
 
 ### Node-5
@@ -183,8 +237,8 @@ Add
 10.10.2.10 crdb-node2
 10.10.3.10 crdb-node3
 10.10.4.10 crdb-node4
-10.20.1.10 crdb-node5
-10.20.2.10 crdb-node6
+10.30.1.10 crdb-node5
+10.30.2.10 crdb-node6
 ```
 
 Verify
