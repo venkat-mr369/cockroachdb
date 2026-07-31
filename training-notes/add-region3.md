@@ -41,7 +41,7 @@ aws ec2 create-tags \
 ```
 
 ### Required Inbound Rules
-
+```text
   Region        Protocol    Port Source
   ----------- ---------- ------- -----------------
   Mumbai             TCP      22 0.0.0.0/0 (Lab)
@@ -54,7 +54,7 @@ aws ec2 create-tags \
   Singapore          TCP   26257 10.30.0.0/16
   Singapore          TCP    8080 0.0.0.0/0
   Singapore         ICMP     All 10.10.0.0/16
-
+```
 > Do **not** use `10.30.0.0/24`. Use the full Singapore VPC CIDR
 > `10.30.0.0/16`.
 
