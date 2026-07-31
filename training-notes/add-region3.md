@@ -45,11 +45,11 @@ aws ec2 authorize-security-group-ingress \
   --cidr 10.10.0.0/16
 ```
 
-Allow Region-B VPC as well:
+Allow Region-B VPC & SG_ID (singapore region) as well:
 
 ```bash
 aws ec2 authorize-security-group-ingress \
-  --group-id <SG-ID> \
+  --group-id sg-0fe5b9174d0eb03cf \
   --protocol tcp \
   --port 26257 \
   --cidr 10.30.0.0/16
@@ -61,7 +61,7 @@ aws ec2 authorize-security-group-ingress \
 
 ```bash
 aws ec2 authorize-security-group-ingress \
-  --group-id <SG-ID> \
+  --group-id sg-0fe5b9174d0eb03cf  \
   --protocol tcp \
   --port 8080 \
   --cidr 10.10.0.0/16
@@ -69,7 +69,7 @@ aws ec2 authorize-security-group-ingress \
 
 ```bash
 aws ec2 authorize-security-group-ingress \
-  --group-id <SG-ID> \
+  --group-id sg-0fe5b9174d0eb03cf \
   --protocol tcp \
   --port 8080 \
   --cidr 10.30.0.0/16
@@ -83,7 +83,7 @@ This allows all protocols between nodes in both VPCs.
 
 ```bash
 aws ec2 authorize-security-group-ingress \
-  --group-id <SG-ID> \
+  --group-id 0fe5b9174d0eb03cf \
   --protocol -1 \
   --cidr 10.10.0.0/16
 ```
@@ -94,6 +94,15 @@ aws ec2 authorize-security-group-ingress \
   --protocol -1 \
   --cidr 10.30.0.0/16
 ```
+To Ping Node1, Node2 from Singapore (Region B) 
+```
+aws ec2 authorize-security-group-ingress \
+  --region ap-southeast-1 \
+  --group-id sg-0fe5b9174d0eb03cf \
+  --protocol icmp \
+  --port -1 \
+  --cidr 10.10.0.0/16
+```
 
 ---
 
@@ -101,7 +110,7 @@ aws ec2 authorize-security-group-ingress \
 
 ```bash
 aws ec2 describe-security-groups \
-  --group-ids <SG-ID>
+  --group-ids 0fe5b9174d0eb03cf
 ```
 
 ### Expected Rules
