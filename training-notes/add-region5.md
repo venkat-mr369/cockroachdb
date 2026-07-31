@@ -30,10 +30,16 @@ aws ec2 create-vpc-peering-connection \
 Expected output:
 
 ```text
-VpcPeeringConnectionId: pcx-0123456789abcdef0
+VpcPeeringConnectionId: pcx-0857c1a3ac1c80948
 ```
 
-Save the **VpcPeeringConnectionId**.
+Save the **VpcPeeringConnectionId**. & add a tag 
+
+```
+aws ec2 create-tags \
+  --resources pcx-0857c1a3ac1c80948 \
+  --tags Key=Name,Value=Mumbai-Singapore-Peering
+```
 
 ---
 
@@ -44,7 +50,7 @@ Run in **Region-B (Singapore)**:
 ```bash
 aws ec2 accept-vpc-peering-connection \
   --region ap-southeast-1 \
-  --vpc-peering-connection-id <PCX-ID>
+  --vpc-peering-connection-id pcx-0857c1a3ac1c80948
 ```
 
 ---
@@ -95,47 +101,13 @@ aws ec2 create-route \
 ```bash
 aws ec2 describe-vpc-peering-connections \
   --region ap-south-1 \
-  --vpc-peering-connection-ids <PCX-ID>
+  --vpc-peering-connection-ids pcx-0857c1a3ac1c80948
 ```
 
 Expected state:
 
 ```text
 Status: active
-```
-
----
-
-### Step 5.6 Test Network Connectivity
-
-From **Node1**:
-
-```bash
-ping 10.20.1.10
-```
-
-```bash
-ping 10.30.2.10
-```
-
-From **Node5**:
-
-```bash
-ping 10.10.1.10
-```
-
-```bash
-ping 10.10.2.10
-```
-
-Test the CockroachDB SQL port:
-
-```bash
-nc -zv 10.10.1.10 26257
-```
-
-```bash
-nc -zv 10.30.1.10 26257
 ```
 
 ### Expected Result
