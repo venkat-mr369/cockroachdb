@@ -1,119 +1,95 @@
-#### The two VPCs (Region-A and Region-B) must be able to communicate.
+### Step 5: Configure Inter-Region VPC Peering
 
+#### Region-A (Mumbai)
 
-**Region-A (Existing Cluster)**
+-   Region: `ap-south-1`
+-   CIDR: `10.10.0.0/16`
 
-* Region: `ap-south-1` (Mumbai)
-* VPC CIDR: `10.10.0.0/16`
-* VPC ID: `<VPC1-ID>`
+#### Region-B (Singapore)
 
-**Region-B (New Region)**
+-   Region: `ap-southeast-1`
+-   CIDR: `10.30.0.0/16`
 
-* Region: `ap-southeast-1` (Singapore)
-* VPC CIDR: `10.30.0.0/16`
-* VPC ID: `<VPC2-ID>`
+### 5.1 Create Peering
 
----
-
-### Step 5.1 Create an Inter-Region VPC Peering Connection
-
-Run from **Region-A (Mumbai)**:
-
-```bash
+``` bash
 aws ec2 create-vpc-peering-connection \
   --region ap-south-1 \
-  --vpc-id <VPC1-ID> \
-  --peer-vpc-id <VPC2-ID> \
+  --vpc-id <MUMBAI-VPC-ID> \
+  --peer-vpc-id <SINGAPORE-VPC-ID> \
   --peer-region ap-southeast-1
 ```
 
-Expected output:
+Tag it:
 
-```text
-VpcPeeringConnectionId: pcx-0857c1a3ac1c80948
-```
-
-Save the **VpcPeeringConnectionId**. & add a tag 
-
-```
+``` bash
 aws ec2 create-tags \
-  --resources pcx-0857c1a3ac1c80948 \
+  --region ap-south-1 \
+  --resources <PCX-ID> \
   --tags Key=Name,Value=Mumbai-Singapore-Peering
 ```
 
----
+### 5.2 Accept Peering
 
-### Step 5.2 Accept the Peering Connection
-
-Run in **Region-B (Singapore)**:
-
-```bash
+``` bash
 aws ec2 accept-vpc-peering-connection \
   --region ap-southeast-1 \
-  --vpc-peering-connection-id pcx-0857c1a3ac1c80948
+  --vpc-peering-connection-id <PCX-ID>
 ```
 
----
+### 5.3 Add Routes
 
-### Step 5.3 Add a Route in Region-A
+Mumbai:
 
-Find your Route Table ID:
-
-```bash
-aws ec2 describe-route-tables --region ap-south-1
-```
-
-Add the route:
-
-```bash
+``` bash
 aws ec2 create-route \
   --region ap-south-1 \
-  --route-table-id <RTB1-ID> \
+  --route-table-id <MUMBAI-RTB-ID> \
   --destination-cidr-block 10.30.0.0/16 \
   --vpc-peering-connection-id <PCX-ID>
 ```
 
----
+Singapore:
 
-### Step 5.4 Add a Route in Region-B
-
-Find the Route Table:
-
-```bash
-aws ec2 describe-route-tables \
-  --region ap-southeast-1
-```
-
-Add the route:
-
-```bash
+``` bash
 aws ec2 create-route \
   --region ap-southeast-1 \
-  --route-table-id <RTB2-ID> \
+  --route-table-id <SINGAPORE-RTB-ID> \
   --destination-cidr-block 10.10.0.0/16 \
   --vpc-peering-connection-id <PCX-ID>
 ```
 
----
+### 5.4 Verify Routes
 
-### Step 5.5 Verify the Peering Connection
+Mumbai should contain:
 
-```bash
-aws ec2 describe-vpc-peering-connections \
-  --region ap-south-1 \
-  --vpc-peering-connection-ids pcx-0857c1a3ac1c80948
+-   10.10.0.0/16 → local
+-   10.30.0.0/16 → PCX
+-   0.0.0.0/0 → IGW
+
+Singapore should contain:
+
+-   10.30.0.0/16 → local
+-   10.10.0.0/16 → PCX
+-   0.0.0.0/0 → IGW
+
+``` bash
+aws ec2 describe-route-tables --region ap-south-1 --route-table-ids <MUMBAI-RTB-ID> --query "RouteTables[*].Routes[*].[DestinationCidrBlock,VpcPeeringConnectionId,State]" --output table
+
+aws ec2 describe-route-tables --region ap-southeast-1 --route-table-ids <SINGAPORE-RTB-ID> --query "RouteTables[*].Routes[*].[DestinationCidrBlock,VpcPeeringConnectionId,State]" --output table
 ```
 
-Expected state:
+### 5.5 Connectivity Test
 
-```text
-Status: active
+From Node1:
+
+``` bash
+ping 10.30.1.10
 ```
 
-### Expected Result
+From Node5:
 
-* ✅ VPC peering status is **Active**
-* ✅ Routes exist in both VPC route tables
-* ✅ Nodes in both regions can reach each other over the private IP addresses
-
-
+``` bash
+ping 10.10.1.10
+nc -zv 10.10.1.10 26257
+```
