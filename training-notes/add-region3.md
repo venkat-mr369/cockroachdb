@@ -1,136 +1,95 @@
-### Step 3: Create Security Group
+### Step 5: Configure Inter-Region VPC Peering
 
-#### 3.1 Create the Security Group
+#### Region-A (Mumbai)
 
-```bash
-aws ec2 create-security-group \
-  --group-name crdb-sg \
-  --description "CockroachDB Security Group" \
-  --vpc-id <VPC-ID>
+-   Region: `ap-south-1`
+-   CIDR: `10.10.0.0/16`
+
+#### Region-B (Singapore)
+
+-   Region: `ap-southeast-1`
+-   CIDR: `10.30.0.0/16`
+
+### 5.1 Create Peering
+
+``` bash
+aws ec2 create-vpc-peering-connection \
+  --region ap-south-1 \
+  --vpc-id <MUMBAI-VPC-ID> \
+  --peer-vpc-id <SINGAPORE-VPC-ID> \
+  --peer-region ap-southeast-1
 ```
 
-Example output:
+Tag it:
 
-```json
-{
-    "GroupId": "sg-0123456789abcdef0"
-}
+``` bash
+aws ec2 create-tags \
+  --region ap-south-1 \
+  --resources <PCX-ID> \
+  --tags Key=Name,Value=Mumbai-Singapore-Peering
 ```
 
-Save the **GroupId** (for example, `sg-0123456789abcdef0`).
+### 5.2 Accept Peering
 
----
-
-#### 3.2 Allow SSH (Port 22)
-
-> For a production environment, replace `0.0.0.0/0` with your office or VPN public IP.
-
-```bash
-aws ec2 authorize-security-group-ingress \
-  --group-id <SG-ID> \
-  --protocol tcp \
-  --port 22 \
-  --cidr 0.0.0.0/0
-```
-
----
-
-#### 3.3 Allow CockroachDB SQL Port (26257)
-
-```bash
-aws ec2 authorize-security-group-ingress \
-  --group-id <SG-ID> \
-  --protocol tcp \
-  --port 26257 \
-  --cidr 10.10.0.0/16
-```
-
-Allow Region-B VPC & SG_ID (singapore region) as well:
-
-```bash
-aws ec2 authorize-security-group-ingress \
-  --group-id sg-0fe5b9174d0eb03cf \
-  --protocol tcp \
-  --port 26257 \
-  --cidr 10.30.0.0/16
-```
-
----
-
-#### 3.4 Allow Admin UI (8080)
-
-```bash
-aws ec2 authorize-security-group-ingress \
-  --group-id sg-0fe5b9174d0eb03cf  \
-  --protocol tcp \
-  --port 8080 \
-  --cidr 10.10.0.0/16
-```
-
-```bash
-aws ec2 authorize-security-group-ingress \
-  --group-id sg-0fe5b9174d0eb03cf \
-  --protocol tcp \
-  --port 8080 \
-  --cidr 10.30.0.0/16
-```
-
----
-
-#### 3.5 Allow All Traffic Between CockroachDB Nodes
-
-This allows all protocols between nodes in both VPCs.
-
-```bash
-aws ec2 authorize-security-group-ingress \
-  --group-id 0fe5b9174d0eb03cf \
-  --protocol -1 \
-  --cidr 10.10.0.0/16
-```
-
-```bash
-aws ec2 authorize-security-group-ingress \
-  --group-id <SG-ID> \
-  --protocol -1 \
-  --cidr 10.30.0.0/16
-```
-To Ping Node1, Node2 from Singapore (Region B) 
-```
-aws ec2 authorize-security-group-ingress \
+``` bash
+aws ec2 accept-vpc-peering-connection \
   --region ap-southeast-1 \
-  --group-id sg-0fe5b9174d0eb03cf \
-  --protocol icmp \
-  --port -1 \
-  --cidr 10.10.0.0/16
+  --vpc-peering-connection-id <PCX-ID>
 ```
 
----
+### 5.3 Add Routes
 
-#### 3.6 Verify the Security Group Rules
+Mumbai:
 
-```bash
-aws ec2 describe-security-groups \
-  --group-ids 0fe5b9174d0eb03cf
+``` bash
+aws ec2 create-route \
+  --region ap-south-1 \
+  --route-table-id <MUMBAI-RTB-ID> \
+  --destination-cidr-block 10.30.0.0/16 \
+  --vpc-peering-connection-id <PCX-ID>
 ```
 
-### Expected Rules
+Singapore:
 
-| Protocol | Port  | Source                                |
-| -------- | ----- | ------------------------------------- |
-| TCP      | 22    | Your IP (or `0.0.0.0/0` for lab only) |
-| TCP      | 26257 | `10.10.0.0/16`                        |
-| TCP      | 26257 | `10.30.0.0/16`                        |
-| TCP      | 8080  | `10.10.0.0/16`                        |
-| TCP      | 8080  | `10.30.0.0/16`                        |
-| All      | All   | `10.30.0.0/16`                        |
-| All      | All   | `10.30.0.0/16`                        |
+``` bash
+aws ec2 create-route \
+  --region ap-southeast-1 \
+  --route-table-id <SINGAPORE-RTB-ID> \
+  --destination-cidr-block 10.10.0.0/16 \
+  --vpc-peering-connection-id <PCX-ID>
+```
 
-#### Next Step
+### 5.4 Verify Routes
 
-**Step 4:** Launch **Node5** and **Node6** EC2 instances using the AWS CLI with:
+Mumbai should contain:
 
-* Ubuntu 24.04 AMI
-* `t3.medium` (or your preferred instance type)
-* Static private IPs (`10.20.1.10` and `10.20.2.10`)
-* The security group created above
-* Your existing EC2 key pair
+-   10.10.0.0/16 → local
+-   10.30.0.0/16 → PCX
+-   0.0.0.0/0 → IGW
+
+Singapore should contain:
+
+-   10.30.0.0/16 → local
+-   10.10.0.0/16 → PCX
+-   0.0.0.0/0 → IGW
+
+``` bash
+aws ec2 describe-route-tables --region ap-south-1 --route-table-ids <MUMBAI-RTB-ID> --query "RouteTables[*].Routes[*].[DestinationCidrBlock,VpcPeeringConnectionId,State]" --output table
+
+aws ec2 describe-route-tables --region ap-southeast-1 --route-table-ids <SINGAPORE-RTB-ID> --query "RouteTables[*].Routes[*].[DestinationCidrBlock,VpcPeeringConnectionId,State]" --output table
+```
+
+### 5.5 Connectivity Test
+
+From Node1:
+
+``` bash
+ping 10.30.1.10
+```
+
+From Node5:
+
+``` bash
+ping 10.10.1.10
+nc -zv 10.10.1.10 26257
+```
