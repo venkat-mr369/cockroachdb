@@ -1,6 +1,4 @@
-### Add Node5 and Node6 to an Existing CockroachDB Cluster (Manualy)
-
-### Step 101: SSH to the Servers
+### SSH to the Servers
 
 ### Node-5
 
@@ -12,6 +10,39 @@ ssh -i ~/.ssh/id_rsa ubuntu@<NODE5_PUBLIC_IP>
 
 ```bash
 ssh -i ~/.ssh/id_rsa ubuntu@<NODE6_PUBLIC_IP>
+```
+---
+
+### Test Network Connectivity
+
+From **Node1**:
+
+```bash
+ping 10.30.1.10
+```
+
+```bash
+ping 10.30.2.10
+```
+
+From **Node5**:
+
+```bash
+ping 10.10.1.10
+```
+
+```bash
+ping 10.10.2.10
+```
+
+Test the CockroachDB SQL port:
+
+```bash
+nc -zv 10.10.1.10 26257
+```
+
+```bash
+nc -zv 10.30.1.10 26257
 ```
 
 ---
