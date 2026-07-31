@@ -64,6 +64,27 @@ aws ec2 create-subnet \
   --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=crdb-subnet-node6}]'
 ```
 
+Enable Auto Public IP Assignment 
+
+Subnet:- crdb-subnet-node5
+
+```
+aws ec2 modify-subnet-attribute  --subnet-id subnet-0cb5a39590f921294 --map-public-ip-on-launch
+```
+Subnet:- crdb-subnet-node6
+
+```
+aws ec2 modify-subnet-attribute  --subnet-id subnet-09a5dfe1d2c26661d --map-public-ip-on-launch
+```
+Verify the Subnets, Expected:- True
+```
+aws ec2 describe-subnets \
+    --region ap-southeast-1 \
+    --subnet-ids subnet-0cb5a39590f921294 subnet-09a5dfe1d2c26661d \
+    --query "Subnets[*].[SubnetId,MapPublicIpOnLaunch]" \
+    --output table
+```
+
 ---
 
 ### 2.5 Create Internet Gateway
