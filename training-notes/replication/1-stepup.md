@@ -34,9 +34,9 @@ LOCALITY=region=mumbai,zone=mumbai-b
 
 ---
 
-# Module 2 - Create Singapore Standby Cluster (2 Nodes)
+### Create Singapore Standby Cluster (2 Nodes)
 
-## Singapore Node 1 (10.30.1.10)
+### Singapore Node 1 (10.30.1.10)
 
 ```bash
 sudo vi /etc/default/cockroach
@@ -135,9 +135,7 @@ Both services should be **active (running)**.
 Run **only once** from **10.10.1.10**:
 
 ```bash
-cockroach init \
-  --insecure \
-  --host=10.10.1.10:26257
+cockroach init --insecure --host=10.10.1.10:26257
 ```
 
 Expected output:
@@ -153,9 +151,7 @@ Cluster successfully initialized
 Connect:
 
 ```bash
-cockroach sql \
-  --insecure \
-  --host=10.10.1.10:26257
+cockroach sql --insecure --host=10.10.1.10:26257
 ```
 
 Run:
@@ -204,9 +200,7 @@ sudo systemctl status cockroach
 Run **only once** from **10.30.1.10**:
 
 ```bash
-cockroach init \
-  --insecure \
-  --host=10.30.1.10:26257
+cockroach init --insecure --host=10.30.1.10:26257
 ```
 
 Expected:
@@ -222,9 +216,7 @@ Cluster successfully initialized
 Connect:
 
 ```bash
-cockroach sql \
-  --insecure \
-  --host=10.30.1.10:26257
+cockroach sql --insecure --host=10.30.1.10:26257
 ```
 
 Run:
@@ -257,7 +249,7 @@ This **must be different** from the Mumbai Cluster ID.
 On **both clusters**, run:
 
 ```sql
-SET CLUSTER SETTING enterprise.license = 'YOUR_LICENSE_KEY';
+SET CLUSTER SETTING enterprise.license = 'crl-0-EODQ6NQGGAQyEH0vajlANUndqwNHF/AFHQ86EJOHfsC09EVVuYk4nCukzvE';
 ```
 
 Verify:
