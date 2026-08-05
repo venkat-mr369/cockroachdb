@@ -290,9 +290,7 @@ cockroach node recommission <NODE-ID> \
 ### Check Cluster
 
 ```bash
-cockroach node status \
-  --insecure \
-  --host=10.10.1.10:26257
+cockroach node status --insecure --host=10.10.1.10:26257
 ```
 
 * Replicas moved to other nodes
