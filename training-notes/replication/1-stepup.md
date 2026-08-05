@@ -1,8 +1,6 @@
----
+### Create Mumbai Primary Cluster (2 Nodes)
 
-# Module 1 - Create Mumbai Primary Cluster (2 Nodes)
-
-## Mumbai Node 1 (10.10.1.10)
+### Mumbai Node 1 (10.10.1.10)
 
 Edit:
 
