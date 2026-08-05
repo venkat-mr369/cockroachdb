@@ -295,6 +295,12 @@ cockroach node status \
   --host=10.10.1.10:26257
 ```
 
+* Replicas moved to other nodes
+* Node removed from cluster membership
+* Cannot rejoin with the old identity after decommission completes
+* Requires a fresh join to become a new cluster member
+
+
 ### Check SQL
 
 ```sql
