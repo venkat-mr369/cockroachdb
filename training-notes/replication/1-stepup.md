@@ -1,4 +1,22 @@
 ### Create Mumbai Primary Cluster (2 Nodes)
+```
+          Primary Cluster
+             Mumbai
++-----------------------------+
+| 10.10.1.10                  |
+| 10.10.2.10                  |
++-----------------------------+
+             ||
+             || Physical Cluster Replication
+             ||
++-----------------------------+
+| 10.30.1.10                  |
+| 10.30.2.10                  |
++-----------------------------+
+          Standby Cluster
+           Singapore
+
+```
 
 ### Mumbai Node 1 (10.10.1.10)
 
