@@ -18,7 +18,7 @@ LOCALITY=region=mumbai,zone=mumbai-a
 
 ---
 
-## Mumbai Node 2 (10.10.2.10)
+### Mumbai Node 2 (10.10.2.10)
 
 ```bash
 sudo vi /etc/default/cockroach
@@ -52,7 +52,7 @@ LOCALITY=region=singapore,zone=singapore-a
 
 ---
 
-## Singapore Node 2 (10.30.2.10)
+### Singapore Node 2 (10.30.2.10)
 
 ```bash
 sudo vi /etc/default/cockroach
@@ -68,7 +68,7 @@ LOCALITY=region=singapore,zone=singapore-b
 
 ---
 
-# Module 3 - Clean Old Cluster Data
+### Clean Old Cluster Data
 
 Run on **all four servers**.
 
@@ -112,7 +112,7 @@ sudo systemctl daemon-reload
 
 ---
 
-# Module 4 - Start the Mumbai Cluster
+### Start the Mumbai Cluster
 
 On **both Mumbai nodes**:
 
@@ -130,7 +130,7 @@ Both services should be **active (running)**.
 
 ---
 
-## Initialize the Mumbai Cluster
+### Initialize the Mumbai Cluster
 
 Run **only once** from **10.10.1.10**:
 
@@ -183,7 +183,7 @@ Save this Cluster ID.
 
 ---
 
-# Module 5 - Start the Singapore Cluster
+### Start the Singapore Cluster
 
 On **both Singapore nodes**:
 
@@ -199,7 +199,7 @@ sudo systemctl status cockroach
 
 ---
 
-## Initialize the Singapore Cluster
+### Initialize the Singapore Cluster
 
 Run **only once** from **10.30.1.10**:
 
@@ -217,7 +217,7 @@ Cluster successfully initialized
 
 ---
 
-## Verify the Singapore Cluster
+### Verify the Singapore Cluster
 
 Connect:
 
@@ -252,7 +252,7 @@ This **must be different** from the Mumbai Cluster ID.
 
 ---
 
-# Module 6 - Apply the Enterprise License
+### Apply the Enterprise License
 
 On **both clusters**, run:
 
@@ -268,7 +268,7 @@ SHOW CLUSTER SETTING enterprise.license;
 
 ---
 
-## At this point
+### At this point
 
 You will have:
 
@@ -290,7 +290,7 @@ Cluster 2 (Standby)
 Cluster ID : BBBBBBBB
 ```
 
-These are now independent clusters and are the correct foundation for testing Physical Cluster Replication.
+These are now independent clusters and are the correct path for testing Physical Cluster Replication.
 
 ### Next step
 
