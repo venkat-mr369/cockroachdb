@@ -153,13 +153,27 @@ Both services should be **active (running)**.
 Run **only once** from **10.10.1.10**:
 
 ```bash
-cockroach init --insecure --host=10.10.1.10:26257
+cockroach init --insecure --host=10.10.1.10
 ```
 
 Expected output:
 
 ```text
 Cluster successfully initialized
+```
+
+In Node 2, Repeat
+
+```
+sudo systemctl stop cockroach
+sudo rm -rf /var/lib/cockroach/data
+sudo rm -rf /var/lib/cockroach/logs
+sudo mkdir -p /var/lib/cockroach/data
+sudo mkdir -p /var/lib/cockroach/logs
+sudo chown -R cockroach:cockroach /var/lib/cockroach
+```
+```
+sudo systemctl start cockroach
 ```
 
 ---
@@ -169,22 +183,33 @@ Cluster successfully initialized
 Connect:
 
 ```bash
+cockroach node status --host=10.10.1.10:26257 --insecure
+```
+Expected:
+
+```text
+  id |     address      |   sql_address    |  build  |              started_at              |              updated_at              |            locality            | is_available | is_live
+-----+------------------+------------------+---------+--------------------------------------+--------------------------------------+--------------------------------+--------------+----------
+   1 | 10.10.1.10:26257 | 10.10.1.10:26257 | v25.2.2 | 2026-08-08 04:36:35.518003 +0000 UTC | 2026-08-08 04:45:05.600976 +0000 UTC | region=mumbai,zone=mumbai-3hub | true         | true
+   2 | 10.10.2.10:26257 | 10.10.2.10:26257 | v25.2.2 | 2026-08-08 04:40:16.843455 +0000 UTC | 2026-08-08 04:45:04.909075 +0000 UTC | region=mumbai,zone=mumbai-4hub | true         | true
+(2 rows)
+```
+```
 cockroach sql --insecure --host=10.10.1.10:26257
 ```
 
 Run:
 
 ```sql
-SHOW NODES;
+SELECT node_id, address, locality, server_version FROM crdb_internal.kv_node_status;
 ```
 
-Expected:
-
-```text
-node_id | address
---------+------------------
-1       | 10.10.1.10
-2       | 10.10.2.10
+```
+  node_id |     address      |            locality            | server_version
+----------+------------------+--------------------------------+-----------------
+        1 | 10.10.1.10:26257 | region=mumbai,zone=mumbai-3hub | 25.2
+        2 | 10.10.2.10:26257 | region=mumbai,zone=mumbai-4hub | 25.2
+(2 rows)
 ```
 
 Verify the Cluster ID:
