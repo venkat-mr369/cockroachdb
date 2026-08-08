@@ -252,6 +252,7 @@ Cluster successfully initialized
 ```
 
 ---
+Continue following the steps used for the Mumbai cluster, repeating them in the same way.
 
 ### Verify the Singapore Cluster
 
