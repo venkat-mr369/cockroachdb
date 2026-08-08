@@ -58,6 +58,32 @@ aws ec2 create-tags \
 > Do **not** use `10.30.0.0/24`. Use the full Singapore VPC CIDR
 > `10.30.0.0/16`.
 
+Add TCP 26257 for Singapore VPC (10.30.0.0/16)
+```
+aws ec2 authorize-security-group-ingress \
+    --group-id sg-0fe5b9174d0eb03cf \
+    --protocol tcp \
+    --port 26257 \
+    --cidr 10.30.0.0/16 \
+    --region ap-southeast-1
+```
+Add ICMP for Singapore VPC (10.30.0.0/16)
+```
+aws ec2 authorize-security-group-ingress \
+    --group-id sg-0fe5b9174d0eb03cf \
+    --protocol icmp \
+    --port -1 \
+    --cidr 10.30.0.0/16 \
+    --region ap-southeast-1
+```
+Verify the rules
+
+```
+aws ec2 describe-security-groups \
+    --group-ids sg-0fe5b9174d0eb03cf \
+    --region ap-southeast-1
+```
+
 ### Verify
 
 ``` bash
