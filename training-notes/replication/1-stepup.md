@@ -194,11 +194,10 @@ Expected:
    2 | 10.10.2.10:26257 | 10.10.2.10:26257 | v25.2.2 | 2026-08-08 04:40:16.843455 +0000 UTC | 2026-08-08 04:45:04.909075 +0000 UTC | region=mumbai,zone=mumbai-4hub | true         | true
 (2 rows)
 ```
+Connect & Run:
 ```
 cockroach sql --insecure --host=10.10.1.10:26257
 ```
-
-Run:
 
 ```sql
 SELECT node_id, address, locality, server_version FROM crdb_internal.kv_node_status;
@@ -207,8 +206,8 @@ SELECT node_id, address, locality, server_version FROM crdb_internal.kv_node_sta
 ```
   node_id |     address      |            locality            | server_version
 ----------+------------------+--------------------------------+-----------------
-        1 | 10.10.1.10:26257 | region=mumbai,zone=mumbai-3hub | 25.2
-        2 | 10.10.2.10:26257 | region=mumbai,zone=mumbai-4hub | 25.2
+        1 | 10.10.1.10:26257 | region=mumbai,zone=mumbai-1hub | 25.2
+        2 | 10.10.2.10:26257 | region=mumbai,zone=mumbai-2hub | 25.2
 (2 rows)
 ```
 
